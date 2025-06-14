@@ -7,6 +7,7 @@ from core.db_helper import (
     fetch_all_products,
     fetch_products_grouped_by_category
 )
+from core.db_helper import fetch_product_by_id
 
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ def add_product():
     category = request.form.get('prodCat')
     description = request.form.get('prodDesc')
     stock = int(request.form.get('prodStock', 0))
+    image_url = request.form["image_url"]
 
     # Optional: validation
     if not name or not category:
@@ -83,6 +85,24 @@ def products():
 @app.route('/cart')
 def cart():
     return render_template("cart.html")
+
+
+@app.route('/create-profile', methods=['POST'])
+def create_profile():
+    username = request.form['username']
+    phone = request.form['phone']
+    email = request.form['email']
+    address = request.form['address']
+    # Optional: Save to file or database
+    return redirect('/')
+
+
+@app.route('/product/<int:prod_id>')
+def product_detail(prod_id):
+    product = fetch_product_by_id(prod_id)
+    if not product:
+        return "Product not found", 404
+    return render_template("product_detail.html", product=product)
 
 
 if __name__ == '__main__':

@@ -45,13 +45,14 @@ class User:
 
 
 class Product:
-    def __init__(self, id, name, price, category, description, stock):
+    def __init__(self, id, name, price, category, description, stock, image_url=""):
         self.id = id
         self.name = name
         self.price = price
         self.category = category
         self.description = description
         self.stock = stock
+        self.image_url = image_url
 
     def display(self):
         print(f"Product id: {self.id}")

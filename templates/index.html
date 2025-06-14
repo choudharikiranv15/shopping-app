@@ -15,12 +15,13 @@
 
     <!-- Profile Section -->
     <div class="section">
-        <h2>👤 Create Profile</h2>
-        <input type="text" placeholder="Enter Username" id="username">
-        <input type="text" placeholder="Phone Number" id="phone">
-        <input type="email" placeholder="Email ID" id="email">
-        <input type="text" placeholder="Address" id="address">
-        <button onclick="createProfile()">Create Profile</button>
+        <form action="/create-profile" method="POST">
+    <input type="text" name="username" placeholder="Enter Username">
+    <input type="text" name="phone" placeholder="Phone Number">
+    <input type="email" name="email" placeholder="Email ID">
+    <input type="text" name="address" placeholder="Address">
+    <button type="submit" class="btn btn-primary">Create Profile</button>
+</form>
     </div>
 
     <!-- Add Product Section -->
@@ -33,9 +34,22 @@
         <input type="text" name="prodCat" placeholder="Category" required>
         <input type="text" name="prodDesc" placeholder="Description">
         <input type="number" name="prodStock" placeholder="Stock" required>
+        <label for="image_url">Image URL:</label>
+        <input type="text" name="image_url" id="image_url" required>
+
+
         <button type="submit">Add Product</button>
     </form>
 </div>
+<a href="/product/{{ p.id }}">
+  <div class="card" style="width: 18rem;">
+    <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.name }}">
+    <div class="card-body">
+      <h5 class="card-title">{{ p.name }}</h5>
+      <p class="card-text">₹{{ p.price }}</p>
+    </div>
+  </div>
+</a>
 
 
 

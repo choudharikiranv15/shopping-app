@@ -48,3 +48,11 @@ def fetch_products_grouped_by_category():
             grouped[cat] = []
         grouped[cat].append(row)
     return grouped
+
+
+def fetch_product_by_id(prod_id):
+    conn = get_db_connection()
+    cursor = conn.execute("SELECT * FROM products WHERE id = ?", (prod_id,))
+    product = cursor.fetchone()
+    conn.close()
+    return product
