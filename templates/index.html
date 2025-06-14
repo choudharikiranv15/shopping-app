@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shopping App</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background-color: #f5f5f5; }
+        h2 { color: #333; }
+        .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background: white; border-radius: 8px; }
+        input, select, button { margin: 5px 0; padding: 5px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <h1>🛍️ Simple Shopping App</h1>
+
+    <!-- Profile Section -->
+    <div class="section">
+        <h2>👤 Create Profile</h2>
+        <input type="text" placeholder="Enter Username" id="username">
+        <input type="text" placeholder="Phone Number" id="phone">
+        <input type="email" placeholder="Email ID" id="email">
+        <input type="text" placeholder="Address" id="address">
+        <button onclick="createProfile()">Create Profile</button>
+    </div>
+
+    <!-- Add Product Section -->
+<div class="section">
+    <h2>🧾 Add Product</h2>
+    <form action="/add-product" method="POST">
+        <input type="text" name="prodId" placeholder="Product ID">
+        <input type="text" name="prodName" placeholder="Product Name" required>
+        <input type="number" name="prodPrice" placeholder="Price" required>
+        <input type="text" name="prodCat" placeholder="Category" required>
+        <input type="text" name="prodDesc" placeholder="Description">
+        <input type="number" name="prodStock" placeholder="Stock" required>
+        <button type="submit">Add Product</button>
+    </form>
+</div>
+
+
+
+    <!-- Cart Section -->
+    <div class="section">
+        <h2>🛒 Cart</h2>
+        <p><strong>Total:</strong> ₹<span id="cartTotal">0</span></p>
+        <button onclick="checkout()">Proceed to Payment</button>
+    </div>
+
+    <!-- Payment Section -->
+    <div class="section">
+        <h2>💳 Payment Method</h2>
+        <select id="paymentOption">
+            <option value="1">Debit Card</option>
+            <option value="2">Credit Card</option>
+            <option value="3">Cash on Delivery</option>
+            <option value="4">Net Banking</option>
+        </select>
+        <button onclick="pay()">Pay Now</button>
+    </div>
+
+    <script>
+        function createProfile() {
+            alert("✅ Profile Created! (Data sent to Python in full app)");
+        }
+
+        function addProduct() {
+            let name = document.getElementById('prodName').value;
+            let price = parseFloat(document.getElementById('prodPrice').value || 0);
+            let total = parseFloat(document.getElementById('cartTotal').innerText);
+            total += price;
+            document.getElementById('cartTotal').innerText = total.toFixed(2);
+            alert(`✔️ ${name} added to cart.`);
+        }
+
+        function checkout() {
+            alert("🛒 Proceeding to payment...");
+        }
+
+        function pay() {
+            let option = document.getElementById('paymentOption').value;
+            let method = ["Debit Card", "Credit Card", "Cash on Delivery", "Net Banking"];
+            alert(`✅ Payment initiated with ${method[option - 1]}.`);
+        }
+    </script>
+
+</body>
+</html>

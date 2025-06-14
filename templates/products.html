@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="page-title">🛍️ Explore Products</h2>
+
+{% for category, items in products_by_category.items() %}
+  <section class="category-section">
+    <h3>{{ category }}</h3>
+    <div class="product-grid">
+      {% for p in items %}
+        <div class="product-card">
+          <h4>{{ p.name }}</h4>
+          <p>₹{{ p.price }}</p>
+          <p>{{ p.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+
+{% endblock %}
