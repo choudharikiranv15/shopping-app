@@ -52,7 +52,7 @@ def fetch_products_grouped_by_category():
 
 def fetch_product_by_id(prod_id):
     conn = get_db_connection()
-    cursor = conn.execute("SELECT * FROM products WHERE id = ?", (prod_id,))
-    product = cursor.fetchone()
+    p = conn.execute("SELECT * FROM products WHERE id = ?",
+                     (prod_id,)).fetchone()
     conn.close()
-    return product
+    return p

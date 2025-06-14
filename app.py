@@ -1,5 +1,5 @@
 from collections import defaultdict
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from core.db_helper import (
     get_all_categories,
@@ -8,9 +8,15 @@ from core.db_helper import (
     fetch_products_grouped_by_category
 )
 from core.db_helper import fetch_product_by_id
+import os
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
-
+app.secret_key = "7411971510$"  # Use a more secure key in production
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Function to fetch products from database
 
 
@@ -61,9 +67,11 @@ def fetch_products():
 
 @app.route('/')
 def index():
-    categories = get_all_categories()
-    products = fetch_products_grouped_by_category()
-    return render_template("index.html", categories=categories, products=products)
+    products = fetch_all_products()  # You must have a function to fetch all products
+    products_by_category = defaultdict(list)
+    for p in products:
+        products_by_category[p['category']].append(p)
+    return render_template("index.html", products_by_category=products_by_category)
 
 
 @app.route('/products/<category>')
@@ -86,17 +94,76 @@ def cart():
     return render_template("cart.html")
 
 
+@app.route('/add-to-cart/<int:prod_id>')
+def add_to_cart(prod_id):
+
+    return redirect(url_for('cart'))
+
+
 @app.route('/create-profile', methods=['POST'])
 def create_profile():
-    username = request.form.get('username')
-    phone = request.form.get('phone')
-    email = request.form.get('email')
-    address = request.form.get('address')
+    username = request.form['username']
+    phone = request.form['phone']
+    email = request.form['email']
+    address = request.form['address']
+    profile_pic_url = request.form.get('profile_pic_url', '').strip()
 
-    # For now, just print/log or save in session
-    print("Profile created:", username, phone, email, address)
+    # Handle file upload
+    uploaded_file = request.files.get('profile_pic_file')
+    profile_pic_file = None
 
-    return redirect(url_for('index'))
+    if uploaded_file and uploaded_file.filename:
+        filename = secure_filename(uploaded_file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        uploaded_file.save(file_path)
+        profile_pic_file = file_path
+
+    # Store in DB
+    conn = sqlite3.connect('database/app.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO profiles (username, phone, email, address, profile_pic_url, profile_pic_file)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (username, phone, email, address, profile_pic_url, profile_pic_file))
+    conn.commit()
+    conn.close()
+
+    # Store in session for display
+    session['user'] = {
+        'username': username,
+        'phone': phone,
+        'email': email,
+        'address': address,
+        'profile_pic_url': profile_pic_url,
+        'profile_pic_file': profile_pic_file
+    }
+
+    return redirect(url_for('profile'))
+
+
+@app.route('/profile')
+def profile():
+    user = session.get('user')
+    if not user:
+        # Fetch the latest saved profile as fallback
+        conn = sqlite3.connect('database/app.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT username, phone, email, address, gender, profile_pic FROM profiles ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            user = {
+                'username': row[0],
+                'phone': row[1],
+                'email': row[2],
+                'address': row[3],
+                'gender': row[4],
+                'profile_pic': row[5]
+            }
+            session['user'] = user
+    return render_template("profile.html", user=user)
 
 
 @app.route('/product/<int:prod_id>')
@@ -105,6 +172,12 @@ def product_detail(prod_id):
     if not product:
         return "Product not found", 404
     return render_template("product_detail.html", product=product)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

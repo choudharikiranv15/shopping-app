@@ -1,20 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ product['name'] }} - Product Details</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>{{ product['name'] }}</h1>
-        <img src="{{ product['image_url'] }}" alt="{{ product['name'] }}" style="max-width: 300px;">
-        <p><strong>Price:</strong> ₹{{ product['price'] }}</p>
-        <p><strong>Category:</strong> {{ product['category'] }}</p>
-        <p><strong>Description:</strong> {{ product['description'] }}</p>
-        <p><strong>Stock:</strong> {{ product['stock'] }}</p>
-        <br>
-        <a href="/" class="btn">⬅ Back to Home</a>
+{% extends "layout.html" %}
+{% block content %}
+<div class="container my-4">
+  <h2>{{ product.name }}</h2>
+  <div style="display: flex; gap: 20px;">
+    <img src="{{ product.image_url }}" alt="{{ product.name }}" width="300">
+    <div>
+      <p><strong>Price:</strong> ₹{{ product.price }}</p>
+      <p><strong>Category:</strong> {{ product.category }}</p>
+      <p><strong>Description:</strong> {{ product.description }}</p>
+      <p><strong>Stock:</strong> {{ product.stock }}</p>
+      <a href="/add-to-cart/{{ product.id }}" class="btn btn-success">Add to Cart</a>
     </div>
-</body>
-</html>
+  </div>
+  <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">← Back</a>
+</div>
+{% endblock %}

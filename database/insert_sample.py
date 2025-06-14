@@ -1,20 +1,20 @@
-# database/insert_sample.py
 import sqlite3
 
+conn = sqlite3.connect('database/app.db')
+cursor = conn.cursor()
 
-def insert_data():
-    conn = sqlite3.connect('database/app.db')
-    cursor = conn.cursor()
+# Add columns to support both upload and URL
+try:
+    cursor.execute("ALTER TABLE profiles ADD COLUMN profile_pic_url TEXT")
+except:
+    pass
 
-    cursor.execute("INSERT INTO products (name, price, category, description, stock) VALUES (?, ?, ?, ?, ?)",
-                   ("Headphones", 1500, "Electronics", "Wireless Bluetooth", 20))
-    cursor.execute("INSERT INTO products (name, price, category, description, stock) VALUES (?, ?, ?, ?, ?)",
-                   ("Shoes", 2500, "Fashion", "Running Shoes", 15))
+try:
+    cursor.execute("ALTER TABLE profiles ADD COLUMN profile_pic_file TEXT")
+except:
+    pass
 
-    conn.commit()
-    conn.close()
-    print("✅ Sample data inserted.")
+conn.commit()
+conn.close()
 
-
-if __name__ == '__main__':
-    insert_data()
+print("✅ profile_pic_url and profile_pic_file columns added.")
