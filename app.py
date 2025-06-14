@@ -9,7 +9,6 @@ from core.db_helper import (
 )
 from core.db_helper import fetch_product_by_id
 
-
 app = Flask(__name__)
 
 # Function to fetch products from database
@@ -89,12 +88,15 @@ def cart():
 
 @app.route('/create-profile', methods=['POST'])
 def create_profile():
-    username = request.form['username']
-    phone = request.form['phone']
-    email = request.form['email']
-    address = request.form['address']
-    # Optional: Save to file or database
-    return redirect('/')
+    username = request.form.get('username')
+    phone = request.form.get('phone')
+    email = request.form.get('email')
+    address = request.form.get('address')
+
+    # For now, just print/log or save in session
+    print("Profile created:", username, phone, email, address)
+
+    return redirect(url_for('index'))
 
 
 @app.route('/product/<int:prod_id>')
