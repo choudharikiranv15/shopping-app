@@ -80,5 +80,10 @@ def products():
     return render_template("products.html", products_by_category=products_by_category)
 
 
+@app.route('/cart')
+def cart():
+    return render_template("cart.html")
+
+
 if __name__ == '__main__':
     app.run(debug=True)

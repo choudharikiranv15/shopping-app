@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ title if title else 'Shopping App' }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Shopping App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-  <header>
-    <nav>
-      <h1>🛒 Shopping App</h1>
-      <a href="/">Home</a>
-      <a href="/cart">Cart</a>
-      <a href="/products">All Products</a>
-    </nav>
-  </header>
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+    <header>
+        <nav>
+            <div class="logo">ShopEase</div>
+            <input type="text" placeholder="Search products..." class="search-bar">
+            <div class="nav-icons">
+                <a href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                <a href="#"><i class="fas fa-user"></i> Profile</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 ShopEase. All rights reserved.</p>
+    </footer>
 </body>
 </html>
