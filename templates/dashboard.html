@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-primary">📊 Welcome, {{ user.username if user else 'Guest' }}!</h2>
+    <p class="text-muted">Manage your profile and explore your dashboard</p>
+  </div>
+
+  {% if user %}
+    <div class="row g-4">
+      <!-- View Profile -->
+      <div class="col-md-4">
+        <div class="card shadow h-100 border-success">
+          <div class="card-body text-center">
+            <h5 class="card-title">👤 View Profile</h5>
+            <p class="card-text">See your profile details and picture.</p>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-success">View</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Profile -->
+      <div class="col-md-4">
+        <div class="card shadow h-100 border-warning">
+          <div class="card-body text-center">
+            <h5 class="card-title">✏️ Edit Profile</h5>
+            <p class="card-text">Update your personal information.</p>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-warning">Edit</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout -->
+      <div class="col-md-4">
+        <div class="card shadow h-100 border-danger">
+          <div class="card-body text-center">
+            <h5 class="card-title">🚪 Logout</h5>
+            <p class="card-text">Sign out of your account securely.</p>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col">
+        <div class="alert alert-info text-center shadow-sm">
+          <strong>Tip:</strong> Keep your profile updated for a better experience!
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center">
+      You are not logged in. Please <a href="/login">Login</a> or <a href="/register">Register</a> to access your dashboard.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
