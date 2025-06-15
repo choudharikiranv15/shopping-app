@@ -3,13 +3,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import os
 import random
-import smtplib
-from email.mime.text import MIMEText
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Mail, Message
-
+from flask_mail import Mail
+from core.mail_config import mail, init_mail
+from core.db_helper import fetch_products_by_name
 from core.otp_helper import send_otp_email
+from flask import jsonify
+
 from core.db_helper import (
     get_all_categories,
     fetch_products_by_category,
@@ -18,31 +19,22 @@ from core.db_helper import (
     fetch_product_by_id
 )
 from core.user_helper import get_user_by_id
-from core.mail_config import mail
 
 app = Flask(__name__)
+init_mail(app)
 app.secret_key = "7411971510$"
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def generate_and_send_otp(email):
-    otp = str(random.randint(100000, 999999))
-    session["otp"] = otp
-    print(f"Generated OTP for {email}: {otp}")
-
-    msg = MIMEText(f"Your OTP code is: {otp}")
-    msg['Subject'] = "Your OTP Code"
-    msg['From'] = "heybuddy20243@gmail.com"
-    msg['To'] = email
+@app.context_processor
+def inject_products():
     try:
-        with smtplib.SMTP('smtp.mailtrap.io', 587) as server:
-            server.starttls()
-            server.login("your_username", "your_password")
-            server.send_message(msg)
-    except Exception as e:
-        print("Email sending failed (expected on dev):", e)
+        products = fetch_all_products()[:6]  # adjust as needed
+    except:
+        products = []
+    return {'products': products}
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -93,11 +85,8 @@ def login():
             session['otp'] = str(random.randint(100000, 999999))
 
             try:
-                msg = Message(subject="Your OTP Code",
-                              sender="your-email@gmail.com",
-                              recipients=[row[3]])
-                msg.body = f"Your OTP code is: {session['otp']}"
-                mail.send(msg)
+                # ✅ use shared function
+                send_otp_email(row[3], session['otp'])
                 flash("OTP sent to your email", "info")
             except Exception as e:
                 print(f"Failed to send OTP: {e}")
@@ -239,11 +228,9 @@ def fetch_products():
 
 @app.route('/')
 def index():
-    products = fetch_all_products()
-    products_by_category = defaultdict(list)
-    for p in products:
-        products_by_category[p['category']].append(p)
-    return render_template("index.html", products_by_category=products_by_category)
+    products_by_category = fetch_products_grouped_by_category()
+    products = fetch_all_products()  # Add this line
+    return render_template("index.html", products_by_category=products_by_category, products=products)
 
 
 @app.route('/products/<category>')
@@ -321,11 +308,11 @@ def profile():
 
     user = {
         'username': row[1],
-        'phone': row[2],
-        'email': row[3],
-        'address': row[4],
-        'gender': row[5],
-        'profile_pic_url': row[6],
+        'phone':    row[2],
+        'email':    row[3],
+        'address':  row[4],
+        'gender':   row[5],
+        'profile_pic_url':  row[6],
         'profile_pic_file': row[7]
     }
 
@@ -393,6 +380,21 @@ def edit_profile():
     return render_template("edit_profile.html", user=user)
 
 
+@app.route('/search')
+def search():
+    query = request.args.get('query', '')
+    products = fetch_products_by_name(query)
+    return render_template('search_results.html', query=query, products=products)
+
+
+@app.route('/product/<int:product_id>')
+def view_product(product_id):
+    product = fetch_product_by_id(product_id)
+    if not product:
+        return "Product not found", 404
+    return render_template('view_product.html', product=product)
+
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -409,16 +411,48 @@ def dashboard():
     user = None
     if row:
         user = {
-            'username': row[1],
-            'phone': row[2],
-            'email': row[3],
-            'address': row[4],
-            'gender': row[5],
-            'profile_pic_url': row[6],
+            'username':         row[1],
+            'phone':            row[2],
+            'email':            row[3],
+            'address':          row[4],
+            'gender':           row[5],
+            'profile_pic_url':  row[6],
             'profile_pic_file': row[7]
         }
 
-    return render_template('dashboard.html', user=user)
+    return render_template("dashboard.html", user=user)
+
+
+@app.route('/ajax/verify-otp', methods=['POST'])
+def ajax_verify_otp():
+    if "user_id" not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    data = request.get_json()
+    entered_otp = data.get("otp")
+
+    if entered_otp == session.get("otp"):
+        session["otp_verified"] = True
+        session.pop("otp", None)
+        return jsonify({'success': True, 'message': 'OTP Verified'})
+    else:
+        return jsonify({'success': False, 'message': 'Incorrect OTP'}), 400
+
+
+@app.route('/ajax/resend-otp', methods=['POST'])
+def ajax_resend_otp():
+    if "user_email" not in session:
+        return jsonify({'success': False, 'message': 'User not logged in'}), 401
+
+    otp = str(random.randint(100000, 999999))
+    session["otp"] = otp
+
+    try:
+        send_otp_email(session['user_email'], otp)
+        return jsonify({'success': True, 'message': 'OTP resent successfully'})
+    except Exception as e:
+        print(f"Failed to resend OTP: {e}")
+        return jsonify({'success': False, 'message': 'Failed to resend OTP'}), 500
 
 
 @app.route('/logout')

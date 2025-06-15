@@ -1,6 +1,27 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>🛒 Your Cart</h2>
-<p>No items yet.</p>
-<!-- Future: Display cart items dynamically -->
+
+<section class="max-w-7xl mx-auto py-24 px-6 text-gray-900 dark:text-white animate__animated animate__fadeIn">
+  <div class="flex flex-col items-center text-center gap-8">
+    <h2 class="text-5xl font-extrabold tracking-tight flex items-center gap-3 text-gray-800 dark:text-white">
+      🛒 Your Cart is Empty
+    </h2>
+
+    <div class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-3xl shadow-2xl p-10 border dark:border-gray-700 transition-all duration-300">
+      <img src="{{ url_for('static', filename='images/empty-cart.svg') }}" alt="Empty Cart"
+           class="w-44 mx-auto mb-6 opacity-80 hover:scale-105 transition-transform duration-300" />
+
+      <p class="text-xl font-medium text-gray-700 dark:text-gray-300">
+        Looks like you haven't added anything yet.
+      </p>
+      <p class="text-sm text-gray-400 mt-2">Explore our top picks and fill it up with joy 🎁</p>
+
+      <a href="{{ url_for('products') }}"
+         class="inline-block mt-6 px-8 py-3 text-white font-semibold bg-yellow-500 hover:bg-yellow-400 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+         🛍️ Start Shopping
+      </a>
+    </div>
+  </div>
+</section>
+
 {% endblock %}

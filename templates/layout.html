@@ -1,42 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Shopping App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Bootstrap CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <!-- Icons (optional) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopEase - Your Smart Shopping Assistant</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+
+  <!-- Tailwind CSS & Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    body {
+      background: linear-gradient(to right, #0f172a, #1e293b);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .hero-bg {
+      background: radial-gradient(circle at center, #6d28d9 0%, #3b0764 100%);
+    }
+  </style>
 </head>
-<body style="background-color: #f5f5f5;">
-    <header class="bg-primary text-white p-3">
-  <div class="container d-flex justify-content-between align-items-center">
-    <a href="/" class="text-white text-decoration-none fw-bold fs-4">ShopEase</a>
-    
-    <input type="text" placeholder="Search products..." class="form-control w-25">
+<body class="text-white">
 
-    <div>
-      <a href="/cart" class="text-white me-3 text-decoration-none">
-        <i class="fas fa-shopping-cart"></i> Cart
-      </a>
-      <a href="/profile" class="text-white text-decoration-none">
-        <i class="fas fa-user"></i> Profile
-      </a>
-      <li class="nav-item">
-  <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-</li>
-
+<!-- Navbar -->
+<header class="bg-gray-900 fixed top-0 w-full z-50 shadow-xl">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <div class="flex items-center gap-3">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ShopEase Logo" class="w-12 h-11 rounded-full">
+      <h1 class="text-2xl font-extrabold text-yellow-400">ShopEase</h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <form action="{{ url_for('search') }}" method="GET" class="hidden sm:flex items-center bg-gray-800 px-3 py-1 rounded-full">
+        <input type="text" name="query" placeholder="Search products..." class="bg-transparent outline-none text-white px-2" required>
+        <button type="submit"><i class="fas fa-search text-yellow-400"></i></button>
+      </form>
+      <div class="flex items-center gap-4">
+        <a href="{{ url_for('cart') }}" class="hover:text-yellow-400 flex items-center gap-1">
+          <i class="fas fa-shopping-cart"></i> <span>Cart</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="hover:text-yellow-400 flex items-center gap-1">
+          <i class="fas fa-user"></i> <span>Profile</span>
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 flex items-center gap-1">
+          <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+        </a>
+      </div>
     </div>
   </div>
 </header>
 
-    <main class="container mt-4">
-        {% block content %}{% endblock %}
-    </main>
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p>&copy; 2025 ShopEase. All rights reserved.</p>
-    </footer>
+<!-- Hero Section -->
+<section class="hero-bg text-center py-40 px-6 animate__animated animate__fadeIn mt-20 rounded-b-3xl shadow-2xl">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-5xl sm:text-6xl font-extrabold mb-6 leading-tight">
+      <i class="fas fa-store text-yellow-400 animate-bounce"></i> Welcome to <span class="text-yellow-300">ShopEase</span>
+    </h1>
+    <p class="text-lg text-gray-100 max-w-xl mx-auto mb-8">Premium products. Unbeatable prices. Seamless shopping experience.</p>
+    <a href="/products" class="inline-block bg-yellow-400 text-black font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-300 transition duration-300">
+      🛍️ Start Shopping
+    </a>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="max-w-7xl mx-auto px-6 py-20 animate__animated animate__fadeInUp">
+  <h2 class="text-4xl font-bold text-center mb-14 text-yellow-300">✨ Featured Products</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+    {% if products is defined %}
+      {% for product in products[:6] %}
+        <div class="bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 group">
+          <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.name }}" class="w-full h-60 object-cover rounded-t-2xl group-hover:brightness-110">
+          <div class="p-6 text-center">
+            <h5 class="text-2xl font-semibold text-yellow-400 group-hover:text-yellow-300">{{ product.name }}</h5>
+            <p class="text-gray-300 text-lg">₹{{ product.price }}</p>
+            <a href="{{ url_for('view_product', product_id=product.id) }}" class="inline-block mt-3 px-4 py-2 border border-yellow-400 text-yellow-400 font-medium rounded hover:bg-yellow-400 hover:text-black transition">🔍 View</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center text-gray-400 col-span-3">No products to display right now.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 pt-10 animate__animated animate__fadeInUp">
+  <div class="max-w-7xl mx-auto px-6 pb-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-gray-300">
+    <div>
+      <h5 class="text-yellow-400 text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-store"></i> ShopEase</h5>
+      <p>Your smart shopping assistant delivering quality products with ease and speed.</p>
+      <div class="flex gap-4 mt-4">
+        <a href="#"><i class="fab fa-facebook fa-lg"></i></a>
+        <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
+        <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
+        <a href="#"><i class="fab fa-linkedin fa-lg"></i></a>
+      </div>
+    </div>
+
+    <div>
+      <h5 class="text-yellow-300 text-lg font-semibold mb-3">Quick Links</h5>
+      <ul>
+        <li><a href="/" class="hover:text-yellow-400">🏠 Home</a></li>
+        <li><a href="/products" class="hover:text-yellow-400">🛒 Products</a></li>
+        <li><a href="/cart" class="hover:text-yellow-400">🧺 Cart</a></li>
+        <li><a href="/dashboard" class="hover:text-yellow-400">📊 Dashboard</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h5 class="text-yellow-300 text-lg font-semibold mb-3">Contact Us</h5>
+      <p><i class="fas fa-envelope text-yellow-300"></i> support@shopease.com</p>
+      <p><i class="fas fa-phone text-yellow-300"></i> +91 98765 43210</p>
+      <p><i class="fas fa-map-marker-alt text-yellow-300"></i> Bengaluru, India</p>
+    </div>
+  </div>
+
+  <div class="bg-gray-950 py-4 text-center text-sm text-gray-400">
+    &copy; 2025 <strong>ShopEase</strong>. All rights reserved. | Made with 💛 in India
+  </div>
+</footer>
+
 </body>
 </html>

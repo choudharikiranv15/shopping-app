@@ -1,47 +1,113 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div class="container py-5">
-  <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
-    <h3 class="text-center mb-4 text-warning">✏️ Edit Profile</h3>
-    <form method="POST" enctype="multipart/form-data">
-      <div class="mb-3">
-        <input type="text" name="username" class="form-control" placeholder="Enter your name" value="{{ user.username }}" required>
-      </div>
-      <div class="mb-3">
-        <input type="text" name="phone" class="form-control" placeholder="Enter phone number" value="{{ user.phone }}" required>
-      </div>
-      <div class="mb-3">
-        <input type="text" name="address" class="form-control" placeholder="Enter your email" value="{{ user.address }}" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Gender:</label>
-        <div class="d-flex gap-3">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="Male" {% if user.gender == 'Male' %}checked{% endif %}>
-            <label class="form-check-label">Male</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="Female" {% if user.gender == 'Female' %}checked{% endif %}>
-            <label class="form-check-label">Female</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="gender" value="Other" {% if user.gender == 'Other' %}checked{% endif %}>
-            <label class="form-check-label">Other</label>
+<section class="max-w-3xl mx-auto py-20 px-6 animate__animated animate__fadeIn">
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-10 border border-yellow-500/30">
+    <h2 class="text-4xl font-extrabold text-yellow-500 text-center mb-10">✏️ Edit Your Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-8">
+      <!-- Profile Preview -->
+      <div class="flex justify-center">
+        <div class="relative group w-32 h-32 rounded-full overflow-hidden shadow-xl ring-4 ring-yellow-400 transition-transform duration-300 hover:scale-105">
+          <img src="{{ user.profile_pic_url or '/static/default-avatar.png' }}" alt="Profile" class="object-cover w-full h-full">
+          <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <span class="text-sm text-white">Current Picture</span>
           </div>
         </div>
       </div>
-      <div class="mb-3">
-        <label>Profile Picture URL</label>
-        <input type="url" class="form-control" name="profile_pic_url" placeholder="Enter profile picture URL" value="{{ user.profile_pic_url }}">
+
+      <!-- Username -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+        <input
+          type="text"
+          name="username"
+          placeholder="Enter your name"
+          value="{{ user.username }}"
+          required
+          class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+        />
       </div>
-      <div class="mb-3">
-        <label>Or Upload New Picture</label>
-        <input type="file" class="form-control" name="profile_pic_file" accept="image/*">
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
+        <input
+          type="text"
+          name="phone"
+          placeholder="Enter phone number"
+          value="{{ user.phone }}"
+          required
+          class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+        />
       </div>
-      <button type="submit" class="btn btn-warning w-100">✅ Save Changes</button>
+
+      <!-- Address -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Address / Email</label>
+        <input
+          type="text"
+          name="address"
+          placeholder="Enter your address or email"
+          value="{{ user.address }}"
+          required
+          class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+        />
+      </div>
+
+      <!-- Gender -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+        <div class="flex gap-6 text-white">
+          <label class="inline-flex items-center gap-2">
+            <input type="radio" name="gender" value="Male" {% if user.gender == 'Male' %}checked{% endif %} class="form-radio text-yellow-400">
+            Male
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input type="radio" name="gender" value="Female" {% if user.gender == 'Female' %}checked{% endif %} class="form-radio text-yellow-400">
+            Female
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input type="radio" name="gender" value="Other" {% if user.gender == 'Other' %}checked{% endif %} class="form-radio text-yellow-400">
+            Other
+          </label>
+        </div>
+      </div>
+
+      <!-- Profile Picture URL -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture URL</label>
+        <input
+          type="url"
+          name="profile_pic_url"
+          placeholder="Paste profile picture URL"
+          value="{{ user.profile_pic_url }}"
+          class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+        />
+      </div>
+
+      <!-- File Upload -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Upload New Picture</label>
+        <input
+          type="file"
+          name="profile_pic_file"
+          accept="image/*"
+          class="w-full file:px-4 file:py-2 file:border-0 file:rounded-lg file:bg-yellow-400 file:text-black hover:file:bg-yellow-300 text-white bg-gray-800 rounded-lg border border-gray-700"
+        />
+      </div>
+
+      <!-- Submit -->
+      <div>
+        <button
+          type="submit"
+          class="w-full py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-lg shadow-lg transition duration-300"
+        >
+          ✅ Save Changes
+        </button>
+      </div>
     </form>
   </div>
-</div>
+</section>
 
 {% endblock %}

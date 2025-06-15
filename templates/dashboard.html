@@ -1,58 +1,57 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container py-5">
-  <div class="text-center mb-4">
-    <h2 class="fw-bold text-primary">📊 Welcome, {{ user.username if user else 'Guest' }}!</h2>
-    <p class="text-muted">Manage your profile and explore your dashboard</p>
+
+<section class="max-w-7xl mx-auto px-6 py-16 text-gray-900 dark:text-white animate__animated animate__fadeInDown">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">📊 Welcome, {{ user.username if user else 'Guest' }}!</h2>
+    <p class="text-gray-500 dark:text-gray-300 mt-2">Manage your profile and explore your dashboard</p>
   </div>
 
   {% if user %}
-    <div class="row g-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- View Profile -->
-      <div class="col-md-4">
-        <div class="card shadow h-100 border-success">
-          <div class="card-body text-center">
-            <h5 class="card-title">👤 View Profile</h5>
-            <p class="card-text">See your profile details and picture.</p>
-            <a href="{{ url_for('profile') }}" class="btn btn-outline-success">View</a>
-          </div>
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-blue-400/50 transform hover:-translate-y-2 transition duration-300">
+        <div class="text-center">
+          <i class="fas fa-user-circle text-5xl text-green-500 mb-4"></i>
+          <h5 class="text-xl font-semibold mb-2">View Profile</h5>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">See your profile details and picture.</p>
+          <a href="{{ url_for('profile') }}" class="inline-block px-5 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">View</a>
         </div>
       </div>
 
       <!-- Edit Profile -->
-      <div class="col-md-4">
-        <div class="card shadow h-100 border-warning">
-          <div class="card-body text-center">
-            <h5 class="card-title">✏️ Edit Profile</h5>
-            <p class="card-text">Update your personal information.</p>
-            <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-warning">Edit</a>
-          </div>
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-yellow-400/50 transform hover:-translate-y-2 transition duration-300">
+        <div class="text-center">
+          <i class="fas fa-pencil-alt text-5xl text-yellow-500 mb-4"></i>
+          <h5 class="text-xl font-semibold mb-2">Edit Profile</h5>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">Update your personal information.</p>
+          <a href="{{ url_for('edit_profile') }}" class="inline-block px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">Edit</a>
         </div>
       </div>
 
       <!-- Logout -->
-      <div class="col-md-4">
-        <div class="card shadow h-100 border-danger">
-          <div class="card-body text-center">
-            <h5 class="card-title">🚪 Logout</h5>
-            <p class="card-text">Sign out of your account securely.</p>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
-          </div>
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-red-400/50 transform hover:-translate-y-2 transition duration-300">
+        <div class="text-center">
+          <i class="fas fa-sign-out-alt text-5xl text-red-500 mb-4"></i>
+          <h5 class="text-xl font-semibold mb-2">Logout</h5>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">Sign out of your account securely.</p>
+          <a href="{{ url_for('logout') }}" class="inline-block px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Logout</a>
         </div>
       </div>
     </div>
 
-    <div class="row mt-5">
-      <div class="col">
-        <div class="alert alert-info text-center shadow-sm">
-          <strong>Tip:</strong> Keep your profile updated for a better experience!
-        </div>
+    <!-- Tip Section -->
+    <div class="mt-16 text-center">
+      <div class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-6 py-4 rounded-xl shadow-md animate__animated animate__fadeInUp inline-block">
+        💡 <strong>Tip:</strong> Keep your profile updated for a better experience!
       </div>
     </div>
+
   {% else %}
-    <div class="alert alert-warning text-center">
-      You are not logged in. Please <a href="/login">Login</a> or <a href="/register">Register</a> to access your dashboard.
+    <div class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-6 py-4 rounded-xl shadow-lg text-center max-w-2xl mx-auto">
+      You are not logged in. Please <a href="/login" class="underline font-medium">Login</a> or <a href="/register" class="underline font-medium">Register</a> to access your dashboard.
     </div>
   {% endif %}
-</div>
+</section>
+
 {% endblock %}

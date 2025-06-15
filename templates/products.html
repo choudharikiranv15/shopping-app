@@ -1,21 +1,33 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<h1>All Products</h1>
+<section class="min-h-screen bg-gray-900 text-white px-4 py-12">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-4xl font-bold text-yellow-400 mb-10 text-center animate__animated animate__fadeInDown">🛍 All Products</h1>
 
-{% for category, products in products_by_category.items() %}
-  <h2>{{ category }}</h2>
-  <div class="product-grid">
-    {% for p in products %}
-      <div class="product-card">
-        <a href="/product/{{ p.id }}">
-          <h3>{{ p.name }}</h3>
-          <img src="{{ p.image_url }}" alt="{{ p.name }}" width="200">
-          <p>₹{{ p.price }}</p>
-        </a>
+    {% for category, products in products_by_category.items() %}
+      <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-yellow-300 mb-5">{{ category }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {% for p in products %}
+            <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-yellow-400 transition-shadow duration-300">
+              <a href="/product/{{ p.id }}" class="block hover:scale-105 transition-transform duration-300">
+                <img
+                  src="{{ p.image_url or url_for('static', filename='images/placeholder.png') }}"
+                  alt="{{ p.name }}"
+                  class="w-full h-48 object-cover"
+                >
+                <div class="p-4">
+                  <h3 class="text-lg font-bold mb-1 text-white">{{ p.name }}</h3>
+                  <p class="text-yellow-400 font-semibold">₹{{ p.price }}</p>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     {% endfor %}
   </div>
-{% endfor %}
+</section>
 
 {% endblock %}

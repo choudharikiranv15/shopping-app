@@ -35,31 +35,97 @@
             color: white;
             border: none;
             cursor: pointer;
+            margin-bottom: 10px;
         }
         button:hover {
             background-color: #2980b9;
         }
+        .resend-btn {
+            background-color: #27ae60;
+        }
+        .resend-btn:hover {
+            background-color: #1e8449;
+        }
         .msg {
-            color: red;
             text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .msg.success {
+            color: green;
+        }
+        .msg.error {
+            color: red;
         }
     </style>
 </head>
 <body>
     <div class="otp-container">
         <h2>Enter OTP</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <p class="msg">{{ message }}</p>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <form method="POST">
-            <input type="text" name="otp" placeholder="Enter the OTP" required>
-            <button type="submit">Verify OTP</button>
-        </form>
+        <input type="text" id="otp" placeholder="Enter the OTP" required>
+        <button id="verifyBtn">Verify OTP</button>
+        <button id="resendBtn" class="resend-btn">Resend OTP</button>
+        <p class="msg" id="responseMsg"></p>
     </div>
+
+    <script>
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const responseMsg = document.getElementById('responseMsg');
+
+        verifyBtn.addEventListener('click', () => {
+            const otp = document.getElementById('otp').value;
+            responseMsg.textContent = '';
+            responseMsg.className = 'msg';
+
+            fetch('/ajax/verify-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ otp })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    responseMsg.textContent = data.message;
+                    responseMsg.classList.add('success');
+                    setTimeout(() => {
+                        window.location.href = "/dashboard";
+                    }, 1000);
+                } else {
+                    responseMsg.textContent = data.message;
+                    responseMsg.classList.add('error');
+                }
+            })
+            .catch(err => {
+                responseMsg.textContent = "Error verifying OTP.";
+                responseMsg.classList.add('error');
+            });
+        });
+
+        resendBtn.addEventListener('click', () => {
+            resendBtn.disabled = true;
+            resendBtn.textContent = "Resending...";
+
+            fetch('/ajax/resend-otp', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                resendBtn.disabled = false;
+                resendBtn.textContent = "Resend OTP";
+                responseMsg.textContent = data.message;
+                responseMsg.className = 'msg';
+                responseMsg.classList.add(data.success ? 'success' : 'error');
+            })
+            .catch(err => {
+                resendBtn.disabled = false;
+                resendBtn.textContent = "Resend OTP";
+                responseMsg.textContent = "Error resending OTP.";
+                responseMsg.className = 'msg error';
+            });
+        });
+    </script>
 </body>
 </html>

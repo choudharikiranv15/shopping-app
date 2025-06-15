@@ -17,6 +17,16 @@ def get_all_categories():
     return categories
 
 
+def fetch_products_by_name(name_query):
+    conn = get_db_connection()
+    cursor = conn.execute(
+        "SELECT * FROM products WHERE name LIKE ?", ('%' + name_query + '%',)
+    )
+    products = cursor.fetchall()
+    conn.close()
+    return products
+
+
 def fetch_all_products():
     conn = get_db_connection()
     cursor = conn.execute("SELECT * FROM products")

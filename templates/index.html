@@ -1,27 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2 class="mb-4">🛍️ Browse Products by Category</h2>
 
-{% for category, items in products_by_category.items() %}
-  <section class="mb-5">
-    <h3 class="text-primary">{{ category }}</h3>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-      {% for p in items %}
-      <div class="col">
-        <div class="card h-100 shadow-sm">
-          <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.name }}"
-     style="height: 200px; object-fit: cover;"
-     onerror="this.onerror=null; this.src='/static/images/placeholder.png';">
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-indigo-800 to-purple-900 text-white py-36 px-6 rounded-xl shadow-lg animate__animated animate__fadeInDown mt-10">
+  <div class="max-w-4xl mx-auto text-center">
+    <h1 class="text-6xl font-extrabold mb-6 leading-tight flex justify-center gap-2">
+      <i class="fas fa-store text-yellow-400 animate-bounce"></i>
+      Welcome to <span class="text-yellow-300">ShopEase</span>
+    </h1>
+    <p class="text-2xl text-gray-100 max-w-xl mx-auto">Your one-stop shop for premium quality products at unbeatable prices!</p>
+    <a href="/products" class="inline-block mt-8 px-8 py-3 bg-yellow-400 text-black font-semibold text-lg rounded-lg shadow-xl hover:bg-yellow-300 transition duration-300">
+      🛍️ Start Shopping
+    </a>
+  </div>
+</section>
 
-          <div class="card-body">
-            <h5 class="card-title">{{ p.name }}</h5>
-            <p class="card-text">₹{{ p.price }}</p>
-            <a href="{{ url_for('product_detail', prod_id=p.id) }}" class="btn btn-outline-primary w-100">View Product</a>
-          </div>
-        </div>
+<!-- Featured Products -->
+<section class="max-w-7xl mx-auto px-6 py-20 text-white animate__animated animate__fadeInUp">
+  <h2 class="text-4xl font-bold text-center mb-14">✨ Featured Products</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+    {% for product in products[:6] %}
+    <div class="bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 group">
+      <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.name }}" class="w-full h-60 object-cover rounded-t-2xl group-hover:brightness-110 transition duration-300">
+      <div class="p-6 text-center">
+        <h5 class="text-2xl font-semibold mb-2 text-yellow-400 group-hover:text-yellow-300 transition">{{ product.name }}</h5>
+        <p class="text-gray-300 text-lg mb-4">₹{{ product.price }}</p>
+        <a href="{{ url_for('view_product', product_id=product.id) }}" class="inline-block px-5 py-2 border border-yellow-400 text-yellow-400 font-medium rounded hover:bg-yellow-400 hover:text-black transition duration-300">
+          🔍 View
+        </a>
       </div>
-      {% endfor %}
     </div>
-  </section>
-{% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
 {% endblock %}
