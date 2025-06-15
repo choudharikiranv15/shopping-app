@@ -1,6 +1,14 @@
 from collections import defaultdict
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
+import os
+import random
+import smtplib
+from email.mime.text import MIMEText
+from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
+
 from core.otp_helper import send_otp_email
 from core.db_helper import (
     get_all_categories,
@@ -10,12 +18,7 @@ from core.db_helper import (
     fetch_product_by_id
 )
 from core.user_helper import get_user_by_id
-import os
-from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
-import random
-import smtplib
-from email.mime.text import MIMEText
+from core.mail_config import mail
 
 app = Flask(__name__)
 app.secret_key = "7411971510$"
@@ -27,15 +30,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def generate_and_send_otp(email):
     otp = str(random.randint(100000, 999999))
     session["otp"] = otp
-    print(f"Generated OTP for {email}: {otp}")  # For development/debugging
+    print(f"Generated OTP for {email}: {otp}")
 
-    # Optional: Send OTP via email
     msg = MIMEText(f"Your OTP code is: {otp}")
     msg['Subject'] = "Your OTP Code"
     msg['From'] = "heybuddy20243@gmail.com"
     msg['To'] = email
     try:
-        # Dummy: plug in real SMTP config here
         with smtplib.SMTP('smtp.mailtrap.io', 587) as server:
             server.starttls()
             server.login("your_username", "your_password")
@@ -88,28 +89,21 @@ def login():
         if row and check_password_hash(row[8], password):
             session['user_id'] = row[0]
             session['user_email'] = row[3]
-            session['otp_verified'] = False  # Reset verification
-
-            # Generate and store OTP in session
-            otp = str(random.randint(100000, 999999))
-            session['otp'] = otp
-
-            # Send OTP via email (you already implemented this)
-            from flask_mail import Mail, Message
-            from core.mail_config import mail  # Assuming this is configured
+            session['otp_verified'] = False
+            session['otp'] = str(random.randint(100000, 999999))
 
             try:
                 msg = Message(subject="Your OTP Code",
                               sender="your-email@gmail.com",
                               recipients=[row[3]])
-                msg.body = f"Your OTP code is: {otp}"
+                msg.body = f"Your OTP code is: {session['otp']}"
                 mail.send(msg)
                 flash("OTP sent to your email", "info")
             except Exception as e:
                 print(f"Failed to send OTP: {e}")
                 flash("Error sending OTP. Try again later.", "danger")
 
-            return redirect(url_for('verify_otp'))  # 👈 Redirect to OTP page
+            return redirect(url_for('verify_otp'))
 
         flash('Invalid credentials', 'danger')
         return redirect(url_for('login'))
@@ -119,14 +113,13 @@ def login():
 
 @app.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
-    if "pending_user_id" not in session:
+    if "user_id" not in session:
         return redirect("/login")
 
     if request.method == "POST":
         entered_otp = request.form["otp"]
         if entered_otp == session.get("otp"):
             session["otp_verified"] = True
-            session["user_id"] = session.pop("pending_user_id")
             session.pop("otp", None)
             flash("OTP Verified!", "success")
             return redirect("/dashboard")
@@ -208,15 +201,15 @@ def add_product():
     category = request.form.get('prodCat')
     description = request.form.get('prodDesc')
     stock = int(request.form.get('prodStock', 0))
-    image_url = request.form["image_url"]
+    image_url = request.form.get("image_url")
 
     if not name or not category:
         return "Missing required fields", 400
 
     conn = sqlite3.connect('database/app.db')
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO products (name, price, category, description, stock) VALUES (?, ?, ?, ?, ?)",
-                   (name, price, category, description, stock))
+    cursor.execute("INSERT INTO products (name, price, category, description, stock, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+                   (name, price, category, description, stock, image_url))
     conn.commit()
     conn.close()
 
@@ -237,7 +230,8 @@ def fetch_products():
             'price': row[2],
             'category': row[3],
             'description': row[4],
-            'stock': row[5]
+            'stock': row[5],
+            'image_url': row[6] if len(row) > 6 else None
         }
         products.append(product)
     return products
