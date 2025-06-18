@@ -1,4 +1,4 @@
-# 🛒 ShopEase – E-Commerce Web Application
+# 🍒 ShopEase – E-Commerce Web Application
 
 ShopEase is a feature-rich, full-stack e-commerce web application built using **Flask**, **SQLite**, **HTML/CSS/JS**, and **TailwindCSS**. It supports both **customer** and **seller** functionalities, allowing users to browse, search, review, and purchase products, while sellers can manage their products and view order statistics.
 
@@ -8,18 +8,18 @@ ShopEase is a feature-rich, full-stack e-commerce web application built using **
 
 ### 👤 Customer Side
 
-* 📟 Register & Login (with OTP verification)
+* 📿 Register & Login (with OTP verification)
 * 🔍 Browse, search, and view products
 * 🛒 Add to Cart and adjust quantity
 * ❤️ Add to Wishlist
 * 💳 Buy Now & Checkout
 * 💰 Payment Page (COD, Card, UPI, Netbanking)
-* 📟 Order Confirmation Page
+* 📿 Order Confirmation Page
 * 📦 Order History with product summary
 * ✍️ Submit Reviews
-* 🢁‍♂️ Edit Profile & Address
+* 🟡‍↗️ Edit Profile & Address
 
-### 🧑‍💼 Seller Side
+### 🧑‍🏫 Seller Side
 
 * 📝 Seller Registration & Login
 * ➕ Add Products with images
@@ -132,14 +132,14 @@ project/
 * 🏠 Homepage
 * 🛒 Product Detail
 * ✅ Order Confirmation
-* 📟 Seller Dashboard
+* 📿 Seller Dashboard
 
 ---
 
 ## 🧠 Future Improvements
 
 * 🔐 JWT-based API auth
-* 📟 PDF Invoice generation
+* 📿 PDF Invoice generation
 * 📦 Admin panel
 * 📊 Sales analytics for sellers
 * 📱 PWA support for mobile
@@ -148,7 +148,7 @@ project/
 
 ## 🙌 Credits
 
-Built with ❤️ by [Kiran Choudhari](https://github.com/your-profile)
+Built with ❤️ by [Kiran Choudhari](https://www.linkedin.com/in/kiranchoudhari-1510m/)
 
 ---
 
