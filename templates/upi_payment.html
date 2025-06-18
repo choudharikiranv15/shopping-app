@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center">
+    <img src="/static/images/upi_logo.png" alt="UPI" class="w-24 mx-auto mb-4">
+    <h2 class="text-2xl font-semibold mb-2">Pay Using UPI</h2>
+    <p class="text-sm text-gray-500 mb-4">Accepted: PhonePe, Google Pay, Paytm</p>
+
+    <form action="{{ url_for('process_payment') }}" method="POST">
+      <input name="upi_id" type="text" placeholder="Enter your UPI ID" required
+             class="w-full border border-gray-300 p-2 rounded mb-4">
+      <button type="submit"
+              class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition">
+        Pay ₹{{ total }}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

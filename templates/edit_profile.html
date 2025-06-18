@@ -39,6 +39,7 @@
           value="{{ user.phone }}"
           required
           class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+          pattern="[0-9]{10}" title="Enter a 10-digit phone number"
         />
       </div>
 
@@ -93,7 +94,7 @@
           type="file"
           name="profile_pic_file"
           accept="image/*"
-          class="w-full file:px-4 file:py-2 file:border-0 file:rounded-lg file:bg-yellow-400 file:text-black hover:file:bg-yellow-300 text-white bg-gray-800 rounded-lg border border-gray-700"
+          class="profile-preview-img object-cover w-full file:px-4 file:py-2 file:border-0 file:rounded-lg file:bg-yellow-400 file:text-black hover:file:bg-yellow-300 text-white bg-gray-800 rounded-lg border border-gray-700"
         />
       </div>
 
@@ -108,6 +109,16 @@
       </div>
     </form>
   </div>
+  <script>
+document.querySelector('input[name="profile_pic_file"]').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const preview = document.querySelector('.profile-preview-img');
+    preview.src = URL.createObjectURL(file);
+  }
+});
+</script>
+
 </section>
 
 {% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="min-h-screen bg-gray-900 text-white py-10 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-3xl font-bold text-pink-400 mb-6">🧾 Checkout</h2>
+
+    {% if addresses|length > 0 %}
+    <form method="POST" action="{{ url_for('checkout') }}" class="space-y-8">
+
+      <!-- Address Section -->
+      <div class="space-y-4">
+        <h3 class="text-xl font-semibold mb-2">Select Shipping Address</h3>
+
+        {% for address in addresses %}
+        <div class="p-4 border border-gray-600 rounded bg-gray-800 relative group">
+          <label class="flex items-start gap-3">
+            <input type="radio" name="address" value="{{ address[0] }}" required class="mt-1">
+            <div>
+              <p class="font-medium">{{ address[2] }}</p>
+              <p class="text-gray-400">{{ address[3] }}, {{ address[4] }}, {{ address[5] }}</p>
+              <p class="text-gray-500">Phone: {{ address[6] }}</p>
+            </div>
+          </label>
+
+          <!-- Edit/Delete Links -->
+          <div class="absolute top-3 right-4 space-x-3">
+            <a href="{{ url_for('edit_address', address_id=address[0]) }}"
+               class="text-blue-400 hover:text-blue-600 text-sm">✏️ Edit</a>
+            <a href="{{ url_for('delete_address', address_id=address[0]) }}"
+               onclick="return confirm('Are you sure you want to delete this address?');"
+               class="text-red-400 hover:text-red-600 text-sm">🗑️ Delete</a>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Add New -->
+        <a href="{{ url_for('add_address') }}" class="inline-block mt-2 text-pink-400 hover:underline">➕ Add new address</a>
+      </div>
+
+      <!-- Payment Section -->
+      <div class="space-y-4">
+        <h3 class="text-xl font-semibold mb-2">Select Payment Method</h3>
+
+        <label class="block">
+          <input type="radio" name="payment_method" value="cod" required class="mr-2">
+          Cash on Delivery
+        </label>
+        <label class="block">
+          <input type="radio" name="payment_method" value="card" class="mr-2">
+          Credit / Debit Card
+        </label>
+        <label class="block">
+          <input type="radio" name="payment_method" value="upi" class="mr-2">
+          UPI / Google Pay / PhonePe
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-2 rounded-lg hover:bg-yellow-300 transition">
+        🚀 Place Order
+      </button>
+
+    </form>
+    {% else %}
+    <div class="bg-red-600 text-white p-4 rounded-md">
+      ⚠️ You don't have any saved addresses. Please add one to proceed.
+    </div>
+    <a href="{{ url_for('add_address') }}" class="inline-block mt-4 text-pink-400 hover:underline">➕ Add Address</a>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

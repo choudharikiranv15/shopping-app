@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section class="min-h-screen bg-gray-900 text-white px-4 py-12">
+  <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg p-8 shadow-xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <img
+        src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}"
+        alt="{{ product.name }}"
+        class="w-full h-64 object-cover rounded"
+      >
+      <div>
+        <h1 class="text-3xl font-bold text-yellow-400 mb-4">{{ product.name }}</h1>
+        <p class="text-lg mb-4">{{ product.description }}</p>
+        <p class="text-2xl font-semibold text-yellow-300">₹{{ product.price }}</p>
+
+        <form action="/add_to_cart/{{ product.id }}" method="POST" class="mt-6">
+          <button type="submit" class="bg-yellow-400 text-black font-bold px-4 py-2 rounded hover:bg-yellow-300 transition duration-300">
+            Add to Cart
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

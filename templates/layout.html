@@ -1,124 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShopEase - Your Smart Shopping Assistant</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ShopEase - Your Smart Shopping Assistant{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
 
-  <!-- Tailwind CSS & Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Animation Libraries -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <style>
-    body {
-      background: linear-gradient(to right, #0f172a, #1e293b);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            'poppins': ['Poppins', 'sans-serif'],
+            'montserrat': ['Montserrat', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              900: '#0a0a0a',
+              800: '#1a1a1a',
+              700: '#2a2a2a',
+              600: '#3a3a3a',
+            },
+            primary: {
+              500: '#8b5cf6',
+              600: '#7c3aed',
+            },
+            accent: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+            }
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          }
+        }
+      }
     }
-    .hero-bg {
-      background: radial-gradient(circle at center, #6d28d9 0%, #3b0764 100%);
+  </script>
+
+  <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px rgba(251, 191, 36, 0.7); }
+      to { text-shadow: 0 0 15px rgba(251, 191, 36, 0.9); }
+    }
+    .gradient-text {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .gradient-bg {
+      background: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.1) 90%);
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      transform: scale(0);
+      animation: ripple 600ms linear;
+      pointer-events: none;
+    }
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
     }
   </style>
 </head>
-<body class="text-white">
+<body class="font-poppins bg-dark-900 text-gray-100 min-h-screen flex flex-col">
 
 <!-- Navbar -->
-<header class="bg-gray-900 fixed top-0 w-full z-50 shadow-xl">
-  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-    <div class="flex items-center gap-3">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ShopEase Logo" class="w-12 h-11 rounded-full">
-      <h1 class="text-2xl font-extrabold text-yellow-400">ShopEase</h1>
-    </div>
-    <div class="flex items-center gap-4">
-      <form action="{{ url_for('search') }}" method="GET" class="hidden sm:flex items-center bg-gray-800 px-3 py-1 rounded-full">
-        <input type="text" name="query" placeholder="Search products..." class="bg-transparent outline-none text-white px-2" required>
-        <button type="submit"><i class="fas fa-search text-yellow-400"></i></button>
-      </form>
-      <div class="flex items-center gap-4">
-        <a href="{{ url_for('cart') }}" class="hover:text-yellow-400 flex items-center gap-1">
-          <i class="fas fa-shopping-cart"></i> <span>Cart</span>
-        </a>
-        <a href="{{ url_for('profile') }}" class="hover:text-yellow-400 flex items-center gap-1">
-          <i class="fas fa-user"></i> <span>Profile</span>
-        </a>
-        <a href="{{ url_for('dashboard') }}" class="hover:text-yellow-400 flex items-center gap-1">
-          <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+<header class="bg-dark-800 fixed top-0 w-full z-50 shadow-lg backdrop-blur-sm bg-opacity-90">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ShopEase Logo" class="h-10 w-10 rounded-full">
+        <a href="/" class="text-2xl font-bold font-montserrat">
+          <span class="gradient-text bg-gradient-to-r from-accent-400 to-primary-500">ShopEase</span>
         </a>
       </div>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-8">
+        <form action="{{ url_for('search') }}" method="GET" class="relative">
+          <input type="text" name="query" placeholder="Search products..." 
+                 class="bg-dark-700 rounded-full py-2 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500 w-64">
+          <button type="submit" class="absolute right-3 top-2 text-gray-400 hover:text-accent-400">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        
+        <div class="flex items-center space-x-6">
+          <a href="{{ url_for('cart') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="hidden lg:inline-block">Cart</span>
+          </a>
+          <a href="{{ url_for('profile') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
+            <i class="fas fa-user"></i>
+            <span class="hidden lg:inline-block">Profile</span>
+          </a>
+          <a href="{{ url_for('dashboard') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
+            <i class="fas fa-tachometer-alt"></i>
+            <span class="hidden lg:inline-block">Dashboard</span>
+          </a>
+          <a href="{{ url_for('wishlist') }}" class="group flex items-center space-x-1 text-accent-400 hover:text-accent-300 transition-colors">
+            <i class="fas fa-heart"></i>
+            <span class="hidden lg:inline-block">Wishlist</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Mobile menu button -->
+      <div class="md:hidden flex items-center">
+        <button id="mobile-menu-button" class="text-gray-400 hover:text-white focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-dark-800 pb-4 px-4">
+    <form action="{{ url_for('search') }}" method="GET" class="mt-2 mb-4">
+      <input type="text" name="query" placeholder="Search products..." 
+             class="bg-dark-700 rounded-full py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-primary-500">
+    </form>
+    <div class="flex flex-col space-y-3">
+      <a href="{{ url_for('cart') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+        <i class="fas fa-shopping-cart mr-2"></i> Cart
+      </a>
+      <a href="{{ url_for('profile') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+        <i class="fas fa-user mr-2"></i> Profile
+      </a>
+      <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+        <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+      </a>
+      <a href="{{ url_for('wishlist') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700 text-accent-400">
+        <i class="fas fa-heart mr-2"></i> Wishlist
+      </a>
     </div>
   </div>
 </header>
 
-<!-- Hero Section -->
-<section class="hero-bg text-center py-40 px-6 animate__animated animate__fadeIn mt-20 rounded-b-3xl shadow-2xl">
-  <div class="max-w-3xl mx-auto">
-    <h1 class="text-5xl sm:text-6xl font-extrabold mb-6 leading-tight">
-      <i class="fas fa-store text-yellow-400 animate-bounce"></i> Welcome to <span class="text-yellow-300">ShopEase</span>
-    </h1>
-    <p class="text-lg text-gray-100 max-w-xl mx-auto mb-8">Premium products. Unbeatable prices. Seamless shopping experience.</p>
-    <a href="/products" class="inline-block bg-yellow-400 text-black font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-300 transition duration-300">
-      🛍️ Start Shopping
-    </a>
-  </div>
-</section>
-
-<!-- Featured Products -->
-<section class="max-w-7xl mx-auto px-6 py-20 animate__animated animate__fadeInUp">
-  <h2 class="text-4xl font-bold text-center mb-14 text-yellow-300">✨ Featured Products</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-    {% if products is defined %}
-      {% for product in products[:6] %}
-        <div class="bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 group">
-          <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.name }}" class="w-full h-60 object-cover rounded-t-2xl group-hover:brightness-110">
-          <div class="p-6 text-center">
-            <h5 class="text-2xl font-semibold text-yellow-400 group-hover:text-yellow-300">{{ product.name }}</h5>
-            <p class="text-gray-300 text-lg">₹{{ product.price }}</p>
-            <a href="{{ url_for('view_product', product_id=product.id) }}" class="inline-block mt-3 px-4 py-2 border border-yellow-400 text-yellow-400 font-medium rounded hover:bg-yellow-400 hover:text-black transition">🔍 View</a>
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p class="text-center text-gray-400 col-span-3">No products to display right now.</p>
-    {% endif %}
-  </div>
-</section>
+<!-- Main Content -->
+<main class="flex-grow pt-16">
+  {% block content %}{% endblock %}
+</main>
 
 <!-- Footer -->
-<footer class="bg-gray-900 pt-10 animate__animated animate__fadeInUp">
-  <div class="max-w-7xl mx-auto px-6 pb-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-gray-300">
-    <div>
-      <h5 class="text-yellow-400 text-xl font-bold mb-2 flex items-center gap-2"><i class="fas fa-store"></i> ShopEase</h5>
-      <p>Your smart shopping assistant delivering quality products with ease and speed.</p>
-      <div class="flex gap-4 mt-4">
-        <a href="#"><i class="fab fa-facebook fa-lg"></i></a>
-        <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
-        <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
-        <a href="#"><i class="fab fa-linkedin fa-lg"></i></a>
+<footer class="bg-dark-800 mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Brand Info -->
+    <div class="space-y-4">
+      <div class="flex items-center space-x-3">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ShopEase Logo" class="h-12 w-12 rounded-full">
+        <h3 class="text-2xl font-bold font-montserrat">
+          <span class="gradient-text bg-gradient-to-r from-accent-400 to-primary-500">ShopEase</span>
+        </h3>
+      </div>
+      <p class="text-gray-400">Your premium shopping destination with the best prices and quality products.</p>
+      <div class="flex space-x-4">
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
       </div>
     </div>
 
-    <div>
-      <h5 class="text-yellow-300 text-lg font-semibold mb-3">Quick Links</h5>
-      <ul>
-        <li><a href="/" class="hover:text-yellow-400">🏠 Home</a></li>
-        <li><a href="/products" class="hover:text-yellow-400">🛒 Products</a></li>
-        <li><a href="/cart" class="hover:text-yellow-400">🧺 Cart</a></li>
-        <li><a href="/dashboard" class="hover:text-yellow-400">📊 Dashboard</a></li>
+    <!-- Quick Links -->
+    <div class="space-y-4">
+      <h4 class="text-lg font-semibold font-montserrat text-accent-400">Quick Links</h4>
+      <ul class="space-y-2">
+        <li><a href="/" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-home mr-2"></i> Home</a></li>
+        <li><a href="/products" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-shopping-bag mr-2"></i> Products</a></li>
+        <li><a href="/cart" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-shopping-cart mr-2"></i> Cart</a></li>
+        <li><a href="/dashboard" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a></li>
       </ul>
     </div>
 
-    <div>
-      <h5 class="text-yellow-300 text-lg font-semibold mb-3">Contact Us</h5>
-      <p><i class="fas fa-envelope text-yellow-300"></i> support@shopease.com</p>
-      <p><i class="fas fa-phone text-yellow-300"></i> +91 98765 43210</p>
-      <p><i class="fas fa-map-marker-alt text-yellow-300"></i> Bengaluru, India</p>
+    <!-- Contact Info -->
+    <div class="space-y-4">
+      <h4 class="text-lg font-semibold font-montserrat text-accent-400">Contact Us</h4>
+      <div class="space-y-2 text-gray-400">
+        <p class="flex items-center"><i class="fas fa-envelope mr-3 text-accent-400"></i> support@shopease.com</p>
+        <p class="flex items-center"><i class="fas fa-phone-alt mr-3 text-accent-400"></i> +91 98765 43210</p>
+        <p class="flex items-center"><i class="fas fa-map-marker-alt mr-3 text-accent-400"></i> Bengaluru, India</p>
+      </div>
     </div>
   </div>
 
-  <div class="bg-gray-950 py-4 text-center text-sm text-gray-400">
-    &copy; 2025 <strong>ShopEase</strong>. All rights reserved. | Made with 💛 in India
+  <div class="bg-dark-900 py-4 text-center text-sm text-gray-500">
+    &copy; 2025 <strong class="text-accent-400">ShopEase</strong>. All rights reserved. | Made with <i class="fas fa-heart text-red-500"></i> in India
   </div>
 </footer>
 
+<!-- Scripts -->
+<script>
+  // Mobile menu toggle
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  mobileMenuButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  // Theme toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  
+  themeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+    
+    if (document.documentElement.classList.contains('dark')) {
+      themeIcon.classList.replace('fa-sun', 'fa-moon');
+    } else {
+      themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+  });
+
+  // Check for saved theme preference
+  if (localStorage.getItem('darkMode') === 'false') {
+    document.documentElement.classList.remove('dark');
+    themeIcon.classList.replace('fa-moon', 'fa-sun');
+  }
+
+  // Ripple effect for buttons
+  document.querySelectorAll('button, a').forEach(element => {
+    element.addEventListener('click', function(e) {
+      if (this.classList.contains('no-ripple')) return;
+      
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+
+  // GSAP animations for page elements
+  document.addEventListener('DOMContentLoaded', () => {
+    gsap.from('header', { 
+      y: -50, 
+      opacity: 0, 
+      duration: 0.8, 
+      ease: "power2.out" 
+    });
+    
+    gsap.from('main > *', {
+      y: 30,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.6,
+      delay: 0.3,
+      ease: "back.out"
+    });
+  });
+</script>
 </body>
 </html>

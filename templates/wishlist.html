@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<section class="max-w-7xl mx-auto px-4 py-20 animate__animated animate__fadeIn text-white">
+  <h2 class="text-4xl font-extrabold text-center mb-12 text-yellow-400 animate__animated animate__fadeInDown">
+    ❤️ Your Wishlist
+  </h2>
+
+  {% if wishlist_items %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+    {% for item in wishlist_items %}
+    <div class="bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate__animated animate__fadeInUp">
+      <img src="{{ item[3] if item[3] else url_for('static', filename='images/placeholder.png') }}" alt="{{ item[1] }}"
+        class="w-full h-56 object-cover rounded-t-2xl brightness-90 hover:brightness-100 transition duration-300" />
+
+      <div class="p-6 flex flex-col items-center text-center">
+        <h3 class="text-2xl font-bold mb-2 text-yellow-300">{{ item[1] }}</h3>
+        <p class="text-lg text-gray-300 mb-4">₹{{ item[2] }}</p>
+
+        <form method="POST" action="{{ url_for('add_to_cart', product_id=item[0]) }}" class="w-full">
+          <button type="submit"
+            class="w-full mb-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-xl transition duration-300 shadow hover:scale-105">
+            🛒 Move to Cart
+          </button>
+        </form>
+
+        <form method="POST" action="{{ url_for('remove_from_wishlist', product_id=item[0]) }}" class="w-full">
+          <button type="submit"
+            class="w-full bg-red-500 hover:bg-red-400 text-white font-semibold py-2 px-4 rounded-xl transition duration-300 shadow hover:scale-105">
+            ❌ Remove
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center text-gray-400 text-xl animate__animated animate__fadeIn">
+    <i class="fas fa-heart-broken text-4xl text-red-500 mb-4 animate__animated animate__bounceIn"></i><br>
+    Your wishlist is empty. <br>
+    <a href="{{ url_for('products') }}" class="text-yellow-400 underline hover:text-yellow-300 transition">
+      Explore products →
+    </a>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}

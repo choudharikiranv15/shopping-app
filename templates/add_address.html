@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="min-h-screen bg-gray-900 text-white py-10 px-4">
+  <div class="max-w-xl mx-auto bg-gray-800 rounded-xl shadow-xl p-8">
+    <h2 class="text-3xl font-bold text-pink-400 mb-6 text-center">➕ Add New Address</h2>
+
+    <form method="POST" class="space-y-6">
+
+      <!-- Full Name -->
+      <div class="relative">
+        <input type="text" name="name" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Full Name" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- Street Address -->
+      <div class="relative">
+        <input type="text" name="street" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Street Address" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- City -->
+      <div class="relative">
+        <input type="text" name="city" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="City" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- State -->
+      <div class="relative">
+        <input type="text" name="state" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="State" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- Pincode -->
+      <div class="relative">
+        <input type="text" name="pincode" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Pincode" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- Phone -->
+      <div class="relative">
+        <input type="tel" name="phone" pattern="[0-9]{10}" required
+               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
+               placeholder="Phone Number" />
+        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
+          
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-center">
+        <button type="submit" class="bg-pink-500 hover:bg-pink-400 text-white font-medium px-6 py-3 rounded-lg transition">
+          💾 Save Address
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}

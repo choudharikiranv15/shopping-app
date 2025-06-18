@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Confirmed - ShopEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+            },
+            primary: {
+              500: '#10b981',
+              600: '#059669',
+            }
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+  <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes confetti {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+    @keyframes checkmark {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0); }
+      50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+    }
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+    .animate-checkmark path {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: checkmark 1s ease-in-out forwards;
+      animation-delay: 0.5s;
+    }
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 1.5rem;
+      padding: 2px;
+      background: linear-gradient(45deg, #10b981, #3b82f6);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      animation: glow 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="font-['Poppins'] bg-dark-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+  <!-- Confetti container -->
+  <div id="confetti-container" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+  <!-- Main card -->
+  <div class="relative max-w-2xl w-full bg-dark-800 rounded-3xl overflow-hidden transition-all duration-500 transform hover:scale-[1.01] glow-border">
+    <!-- Animated background stripe -->
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 to-blue-500 animate-pulse-slow"></div>
+    
+    <!-- Main content -->
+    <div class="p-8 sm:p-10">
+      <!-- Success icon with animation -->
+      <div class="flex justify-center mb-6 animate-float">
+        <lord-icon
+          src="https://cdn.lordicon.com/lupuorrc.json"
+          trigger="loop"
+          delay="1500"
+          colors="primary:#10b981,secondary:#059669"
+          style="width: 120px; height: 120px;">
+        </lord-icon>
+      </div>
+
+      <!-- Success message -->
+      <div class="text-center space-y-3">
+        <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-blue-500">
+          Order Confirmed!
+        </h2>
+        <div class="text-lg font-semibold text-primary-500">Order ID: {{ order.id }}</div>
+        <p class="text-gray-400">
+          Thank you <strong class="text-white">{{ order.address.name }}</strong> for shopping with us!
+        </p>
+        <div class="py-2 px-4 bg-dark-700 rounded-lg inline-block mt-2 border border-primary-500/20">
+          <p class="text-primary-500 font-medium flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 animate-bounce-slow" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Your order is confirmed
+          </p>
+        </div>
+      </div>
+
+      <!-- Shipping info -->
+      <div class="mt-6 p-4 bg-dark-700 rounded-xl border border-dark-600">
+        <h3 class="font-medium text-white mb-2 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+          </svg>
+          Shipping Details
+        </h3>
+        <div class="text-gray-300 space-y-1">
+          <p>{{ order.address.street }}</p>
+          <p>{{ order.address.city }}, {{ order.address.state }}</p>
+          <p>{{ order.address.zip_code }}</p>
+          <p>{{ order.address.country }}</p>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="mt-8 border-t border-dark-600 pt-6">
+        <h3 class="text-xl font-semibold text-white mb-4">Order Summary</h3>
+        
+        <div class="space-y-3">
+          {% for item in order["items"] %}
+          <div class="flex justify-between items-center p-3 hover:bg-dark-700 rounded-lg transition-colors duration-200">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-md bg-primary-500/10 flex items-center justify-center mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-medium text-white">{{ item.name }}</h4>
+                <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
+              </div>
+            </div>
+            <span class="font-medium text-white">₹{{ '%.2f' % (item.price * item.quantity) }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Order total -->
+        <div class="mt-6 pt-4 border-t border-dark-600">
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-400">Subtotal</span>
+            <span class="font-medium text-white">₹{{ '%.2f' % order.total }}</span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-400">Shipping</span>
+            <span class="font-medium text-primary-500">FREE</span>
+          </div>
+          <div class="flex justify-between text-lg font-semibold mt-3">
+            <span class="text-white">Total</span>
+            <span class="text-primary-500">₹{{ '%.2f' % order.total }}</span>
+          </div>
+        </div>
+
+        <!-- Payment and date info -->
+        <div class="mt-6 flex flex-wrap gap-4 text-sm">
+          <div class="flex items-center bg-dark-700 px-3 py-1.5 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+              <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-300">{{ order.payment_method }}</span>
+          </div>
+          <div class="flex items-center bg-dark-700 px-3 py-1.5 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-300">{{ order.date }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Continue shopping button -->
+      <div class="mt-8 text-center">
+        <a href="{{ url_for('products') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-primary-500 to-blue-500 hover:from-primary-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-primary-500/20">
+          Continue Shopping
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Confetti animation
+    document.addEventListener('DOMContentLoaded', () => {
+      // Create confetti
+      const colors = ['#10b981', '#3b82f6', '#ec4899', '#f59e0b', '#8b5cf6'];
+      const container = document.getElementById('confetti-container');
+      
+      for (let i = 0; i < 75; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 10 + 5 + 'px';
+        confetti.style.height = Math.random() * 10 + 5 + 'px';
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        confetti.style.animation = `confetti ${Math.random() * 3 + 2}s linear forwards`;
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        container.appendChild(confetti);
+      }
+      
+      // Add hover effect to card
+      const card = document.querySelector('.relative');
+      card.addEventListener('mouseenter', () => {
+        card.classList.add('shadow-xl');
+      });
+      card.addEventListener('mouseleave', () => {
+        card.classList.remove('shadow-xl');
+      });
+    });
+  </script>
+</body>
+</html>

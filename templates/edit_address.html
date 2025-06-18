@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-900 text-white p-6">
+  <div class="max-w-xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-pink-400">✏️ Edit Address</h2>
+
+    <form method="POST" class="space-y-4">
+      <input name="name" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Name" value="{{ address[2] }}" required>
+      <textarea name="address" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Address" required>{{ address[3] }}</textarea>
+      <input name="city" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="City" value="{{ address[4] }}" required>
+      <input name="pincode" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Pincode" value="{{ address[5] }}" required>
+      <input name="phone" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Phone" value="{{ address[6] }}" required>
+
+      <button type="submit" class="bg-pink-500 px-4 py-2 rounded text-white font-semibold hover:bg-pink-600">Update</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

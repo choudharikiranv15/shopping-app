@@ -1,40 +1,51 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<section class="min-h-screen bg-gray-900 text-white py-12 px-4">
-  <div class="max-w-5xl mx-auto bg-gray-800 p-8 rounded-2xl shadow-xl animate__animated animate__fadeIn">
-    <h2 class="text-3xl font-bold mb-6 text-yellow-400">{{ product.name }}</h2>
+<section class="max-w-5xl mx-auto mt-20 px-6 py-12 bg-gray-900 text-white rounded-2xl shadow-xl animate__animated animate__fadeIn">
+  <div class="flex flex-col md:flex-row gap-10 items-center justify-between">
 
-    <div class="flex flex-col md:flex-row gap-10 items-start">
-      <!-- Product Image -->
-      <img
-        src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}"
-        alt="{{ product.name }}"
-        class="rounded-xl shadow-lg w-full md:w-80 object-cover"
-      >
-
-      <!-- Product Info -->
-      <div class="space-y-4">
-        <p><span class="font-semibold text-gray-300">💰 Price:</span> ₹{{ product.price }}</p>
-        <p><span class="font-semibold text-gray-300">🏷️ Category:</span> {{ product.category }}</p>
-        <p><span class="font-semibold text-gray-300">📝 Description:</span> {{ product.description }}</p>
-        <p><span class="font-semibold text-gray-300">📦 Stock:</span> {{ product.stock }}</p>
-
-        <a
-          href="/add-to-cart/{{ product.id }}"
-          class="inline-block bg-yellow-400 text-black px-6 py-2 rounded-lg font-semibold shadow hover:bg-yellow-300 transition"
-        >
-          🛒 Add to Cart
-        </a>
-      </div>
+    <!-- Product Image -->
+    <div class="w-full md:w-1/2">
+      <img src="{{ product.image_url if product.image_url else url_for('static', filename='images/placeholder.png') }}"
+           alt="{{ product.name }}"
+           class="w-full h-80 object-cover rounded-xl shadow-lg border border-gray-700">
     </div>
 
-    <a
-      href="{{ url_for('index') }}"
-      class="inline-block mt-8 text-yellow-300 hover:underline transition"
-    >
-      ← Back to Home
-    </a>
+    <!-- Product Info -->
+    <div class="flex-1 space-y-5 text-center md:text-left">
+      <h2 class="text-4xl font-bold text-yellow-400">{{ product.name }}</h2>
+      <p class="text-lg text-gray-300">{{ product.description }}</p>
+      <p class="text-2xl font-semibold text-white">₹{{ product.price }}</p>
+
+      <!-- Buttons -->
+      <div class="flex flex-wrap gap-4 justify-center md:justify-start mt-6">
+        
+        <!-- Add to Cart -->
+        <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="px-6 py-2 bg-yellow-400 text-black font-semibold rounded hover:bg-yellow-300 transition">
+            🛒 Add to Cart
+          </button>
+        </form>
+
+        <!-- Buy Now -->
+        <form method="POST" action="{{ url_for('buy_now', product_id=product.id) }}">
+          <button type="submit" class="px-6 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition">
+            ⚡ Buy Now
+          </button>
+        </form>
+
+        <!-- Add to Wishlist -->
+        <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}">
+  <button type="submit"
+    class="mt-4 inline-block bg-pink-500 hover:bg-pink-400 text-white px-4 py-2 rounded-lg font-semibold shadow transition">
+    ❤️ Add to Wishlist
+  </button>
+</form>
+
+        
+      </div>
+    </div>
   </div>
 </section>
 
