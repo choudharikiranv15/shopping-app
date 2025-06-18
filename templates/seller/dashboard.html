@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}Seller Dashboard{% endblock %}
+
+{% block content %}
+<section class="min-h-screen bg-gray-900 text-white py-12 px-4">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-4xl font-bold mb-10 text-yellow-400 text-center">📦 Your Products</h2>
+    {% if products %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for product in products %}
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-yellow-400/40 transition transform hover:-translate-y-1">
+        <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.name }}" class="h-40 w-full object-cover rounded mb-4">
+        <h3 class="text-xl font-semibold text-yellow-300 mb-2">{{ product.name }}</h3>
+        <p class="text-sm text-gray-300">Category: {{ product.category }}</p>
+        <p class="text-sm text-gray-300">Price: ₹{{ product.price }}</p>
+        <p class="text-sm text-gray-300">Stock: {{ product.stock }}</p>
+        <p class="text-sm text-gray-300">🛒 Orders: {{ product.total_orders }}</p>
+        <div class="mt-4 flex gap-2">
+          <a href="{{ url_for('edit_product', product_id=product.id) }}" class="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-300 transition">Edit</a>
+          <a href="{{ url_for('delete_product', product_id=product.id) }}" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-400 transition">Delete</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-gray-400">You haven't added any products yet.</p>
+    {% endif %}
+
+    <div class="text-center mt-12">
+      <a href="{{ url_for('add_product') }}" class="inline-block px-6 py-3 bg-yellow-400 text-black font-semibold rounded hover:bg-yellow-300 transition">+ Add New Product</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

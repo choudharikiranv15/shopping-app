@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="max-w-md mx-auto bg-gray-800 text-white p-8 rounded-lg shadow mt-16">
+  <h2 class="text-3xl font-bold mb-6">Seller Login</h2>
+  <form method="POST">
+    <input name="email" type="email" placeholder="Email" required class="w-full p-2 rounded mb-4 bg-gray-700">
+    <input name="password" type="password" placeholder="Password" required class="w-full p-2 rounded mb-4 bg-gray-700">
+    <button class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded">Login</button>
+  </form>
+</div>
+{% endblock %}

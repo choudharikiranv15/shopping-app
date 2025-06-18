@@ -206,24 +206,51 @@ def show_category_products(category):
 @app.route('/product/<int:product_id>')
 def view_product(product_id):
     conn = sqlite3.connect('database/app.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute(
-        "SELECT id, name, description, price, image_url FROM products WHERE id = ?", (product_id,))
+
+    # Fetch product
+    c.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     row = c.fetchone()
+
+    if not row:
+        flash("Product not found", "danger")
+        return redirect(url_for('products'))
+
+    # Fetch reviews
+    c.execute(
+        "SELECT rating, comment FROM reviews WHERE product_id = ?", (product_id,))
+    review_rows = c.fetchall()
+    reviews = [{"rating": r["rating"], "comment": r["comment"]}
+               for r in review_rows]
+
+    # Calculate average rating (or 0 if no reviews)
+    if review_rows:
+        average_rating = round(sum([r["rating"]
+                               for r in review_rows]) / len(review_rows))
+    else:
+        average_rating = 0
+
+    product = {
+        'id': row['id'],
+        'name': row['name'],
+        'price': row['price'],
+        'description': row['description'],
+        'category': row['category'],
+        'stock': row['stock'],
+        'image_url': row['image_url'],
+        'rating': average_rating,
+        'reviews': reviews
+    }
+
+    # Optionally fetch related products
+    c.execute("SELECT * FROM products WHERE category = ? AND id != ? LIMIT 6",
+              (row['category'], product_id))
+    related_products = c.fetchall()
+
     conn.close()
 
-    if row:
-        product = {
-            'id': row[0],
-            'name': row[1],
-            'description': row[2],
-            'price': row[3],
-            'image_url': row[4]
-        }
-        return render_template('product_detail.html', product=product)
-    else:
-        flash("Product not found.", "danger")
-        return redirect(url_for('products'))
+    return render_template('product_detail.html', product=product, related_products=related_products)
 
 
 @app.route('/add-product', methods=['POST'])
@@ -736,6 +763,175 @@ def get_reviews_for_product(product_id):
                for row in c.fetchall()]
     conn.close()
     return reviews
+
+# Seller Routes
+
+
+@app.route('/seller_register', methods=['GET', 'POST'])
+def seller_register():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database/app.db')
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
+        if c.fetchone():
+            flash("Email already registered", "danger")
+            conn.close()
+            return redirect(url_for('seller_register'))
+
+        c.execute("INSERT INTO sellers (name, email, phone, password) VALUES (?, ?, ?, ?)",
+                  (name, email, phone, password))
+        conn.commit()
+        conn.close()
+
+        flash("Seller registered successfully. Please login.", "success")
+        return redirect(url_for('seller_login'))
+    return render_template('seller_register.html')
+
+
+@app.route('/seller_login', methods=['GET', 'POST'])
+def seller_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database/app.db')
+        c = conn.cursor()
+        c.execute(
+            "SELECT id, name FROM sellers WHERE email = ? AND password = ?", (email, password))
+        seller = c.fetchone()
+        conn.close()
+
+        if seller:
+            session['seller_id'] = seller[0]
+            session['seller_name'] = seller[1]
+            flash("Login successful!", "success")
+            return redirect(url_for('seller_dashboard'))
+        else:
+            flash("Invalid credentials", "danger")
+
+    return render_template('seller/login.html')
+
+
+@app.route('/seller_dashboard')
+def seller_dashboard():
+    if 'seller_id' not in session:
+        return redirect(url_for('seller_login'))
+
+    seller_id = session['seller_id']
+    conn = sqlite3.connect('database/app.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Fetch products with order counts
+    c.execute("""
+        SELECT p.*, 
+               COALESCE(SUM(oi.quantity), 0) AS total_orders
+        FROM products p
+        LEFT JOIN order_items oi ON p.name = oi.product_name
+        WHERE p.seller_id = ?
+        GROUP BY p.id
+    """, (seller_id,))
+    products = c.fetchall()
+    conn.close()
+
+    return render_template('seller_dashboard.html', products=products)
+
+
+@app.route('/seller/add_product', methods=['GET', 'POST'])
+def seller_add_product():
+    if 'seller_id' not in session:
+        return redirect(url_for('seller_login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = float(request.form['price'])
+        category = request.form['category']
+        description = request.form['description']
+        stock = int(request.form['stock'])
+        image_url = request.form.get('image_url', '')
+
+        conn = sqlite3.connect('database/app.db')
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO products (name, price, category, description, stock, image_url, seller_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (name, price, category, description, stock, image_url, session['seller_id']))
+        conn.commit()
+        conn.close()
+
+        flash("Product added successfully!", "success")
+        return redirect(url_for('seller_dashboard'))
+
+    return render_template('seller/add_product.html')
+
+
+@app.route('/seller_logout')
+def seller_logout():
+    session.pop('seller_id', None)
+    session.pop('seller_name', None)
+    flash("Logged out successfully.", "info")
+    return redirect(url_for('seller_login'))
+
+
+@app.route('/seller/edit_product/<int:product_id>', methods=['GET', 'POST'])
+def seller_edit_product(product_id):
+    if 'seller_id' not in session:
+        return redirect(url_for('seller_login'))
+
+    conn = sqlite3.connect('database/app.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = request.form['price']
+        category = request.form['category']
+        description = request.form['description']
+        stock = request.form['stock']
+        image_url = request.form['image_url']
+
+        c.execute("""
+            UPDATE products SET name = ?, price = ?, category = ?, description = ?, stock = ?, image_url = ?
+            WHERE id = ? AND seller_id = ?
+        """, (name, price, category, description, stock, image_url, product_id, session['seller_id']))
+        conn.commit()
+        conn.close()
+
+        flash("Product updated successfully!", "success")
+        return redirect(url_for('seller_dashboard'))
+
+    c.execute("SELECT * FROM products WHERE id = ? AND seller_id = ?",
+              (product_id, session['seller_id']))
+    product = c.fetchone()
+    conn.close()
+
+    if not product:
+        flash("Product not found or unauthorized.", "danger")
+        return redirect(url_for('seller_dashboard'))
+
+    return render_template('seller/edit_product.html', product=product)
+
+
+@app.route('/seller/delete_product/<int:product_id>')
+def seller_delete_product(product_id):
+    if 'seller_id' not in session:
+        return redirect(url_for('seller_login'))
+
+    conn = sqlite3.connect('database/app.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM products WHERE id = ? AND seller_id = ?",
+              (product_id, session['seller_id']))
+    conn.commit()
+    conn.close()
+
+    flash("Product deleted successfully!", "info")
+    return redirect(url_for('seller_dashboard'))
+
 
 # Address Routes
 

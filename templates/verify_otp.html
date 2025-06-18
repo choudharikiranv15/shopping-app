@@ -1,82 +1,287 @@
-<!-- templates/verify_otp.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Verify OTP</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Verify OTP | ShopEase</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <style>
-        body {
-            font-family: Arial;
-            background-color: #f0f2f5;
-            padding: 50px;
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --text: #2b2d42;
+            --light: #f8f9fa;
         }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            color: var(--text);
+        }
+        
         .otp-container {
             background: white;
-            padding: 30px;
-            max-width: 400px;
-            margin: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .otp-container h2 {
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
         }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            box-sizing: border-box;
+        
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
+        
+        .otp-header {
+            margin-bottom: 30px;
+        }
+        
+        .otp-header h2 {
+            font-size: 24px;
+            font-weight: 600;
             margin-bottom: 10px;
+            color: var(--text);
         }
-        button:hover {
-            background-color: #2980b9;
+        
+        .otp-header p {
+            color: #6c757d;
+            font-size: 14px;
         }
-        .resend-btn {
-            background-color: #27ae60;
+        
+        .otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            gap: 10px;
         }
-        .resend-btn:hover {
-            background-color: #1e8449;
-        }
-        .msg {
+        
+        .otp-input {
+            width: 50px;
+            height: 50px;
             text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 600;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s;
         }
+        
+        .otp-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .otp-input.filled {
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .msg {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .msg.success {
-            color: green;
+            display: block;
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
         }
+        
         .msg.error {
-            color: red;
+            display: block;
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--error);
+        }
+        
+        .timer {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="otp-container">
-        <h2>Enter OTP</h2>
-        <input type="text" id="otp" placeholder="Enter the OTP" required>
-        <button id="verifyBtn">Verify OTP</button>
-        <button id="resendBtn" class="resend-btn">Resend OTP</button>
-        <p class="msg" id="responseMsg"></p>
+    <div class="otp-container animate__animated animate__fadeInUp">
+        <div class="otp-header">
+            <lord-icon
+                src="https://cdn.lordicon.com/wloilxuq.json"
+                trigger="loop"
+                delay="2000"
+                colors="primary:#4361ee,secondary:#4361ee"
+                style="width:80px;height:80px">
+            </lord-icon>
+            <h2>Verify Your Identity</h2>
+            <p>We've sent a 6-digit code to your email/phone</p>
+        </div>
+        
+        <div class="otp-input-container">
+            <input type="text" class="otp-input" maxlength="1" data-index="1" autofocus>
+            <input type="text" class="otp-input" maxlength="1" data-index="2">
+            <input type="text" class="otp-input" maxlength="1" data-index="3">
+            <input type="text" class="otp-input" maxlength="1" data-index="4">
+            <input type="text" class="otp-input" maxlength="1" data-index="5">
+            <input type="text" class="otp-input" maxlength="1" data-index="6">
+        </div>
+        
+        <button id="verifyBtn" class="btn btn-primary">
+            <span id="verifyText">Verify OTP</span>
+            <div id="verifySpinner" class="spinner" style="display: none;"></div>
+        </button>
+        
+        <button id="resendBtn" class="btn btn-secondary" disabled>
+            <span id="resendText">Resend OTP</span>
+            <div id="resendSpinner" class="spinner" style="display: none;"></div>
+        </button>
+        
+        <div class="timer" id="timer">Resend OTP in 1:00</div>
+        
+        <div class="msg" id="responseMsg"></div>
     </div>
 
     <script>
+        // DOM Elements
+        const otpInputs = document.querySelectorAll('.otp-input');
         const verifyBtn = document.getElementById('verifyBtn');
         const resendBtn = document.getElementById('resendBtn');
         const responseMsg = document.getElementById('responseMsg');
+        const verifyText = document.getElementById('verifyText');
+        const verifySpinner = document.getElementById('verifySpinner');
+        const resendText = document.getElementById('resendText');
+        const resendSpinner = document.getElementById('resendSpinner');
+        const timer = document.getElementById('timer');
 
+        // OTP Input Handling
+        otpInputs.forEach((input, index) => {
+            // Focus next input on entry
+            input.addEventListener('input', (e) => {
+                if (input.value.length === 1) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                    input.classList.add('filled');
+                } else {
+                    input.classList.remove('filled');
+                }
+            });
+            
+            // Handle backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value.length === 0) {
+                    if (index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                }
+            });
+        });
+
+        // Timer for resend OTP
+        let timeLeft = 60;
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timer.style.display = 'none';
+                resendBtn.disabled = false;
+            }
+        }, 1000);
+
+        // Verify OTP
         verifyBtn.addEventListener('click', () => {
-            const otp = document.getElementById('otp').value;
-            responseMsg.textContent = '';
-            responseMsg.className = 'msg';
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            if (otp.length !== 6) {
+                responseMsg.textContent = 'Please enter a 6-digit OTP';
+                responseMsg.className = 'msg error';
+                return;
+            }
+
+            // Show loading state
+            verifyText.style.display = 'none';
+            verifySpinner.style.display = 'block';
+            verifyBtn.disabled = true;
 
             fetch('/ajax/verify-otp', {
                 method: 'POST',
@@ -89,41 +294,75 @@
             .then(data => {
                 if (data.success) {
                     responseMsg.textContent = data.message;
-                    responseMsg.classList.add('success');
+                    responseMsg.className = 'msg success';
+                    
+                    // Show success animation
+                    verifySpinner.style.display = 'none';
+                    verifyBtn.innerHTML = '<lord-icon src="https://cdn.lordicon.com/ljvjsnvh.json" trigger="loop" colors="primary:#ffffff" style="width:24px;height:24px"></lord-icon> Verified!';
+                    
                     setTimeout(() => {
                         window.location.href = "/dashboard";
-                    }, 1000);
+                    }, 1500);
                 } else {
                     responseMsg.textContent = data.message;
-                    responseMsg.classList.add('error');
+                    responseMsg.className = 'msg error';
+                    verifyText.style.display = 'block';
+                    verifySpinner.style.display = 'none';
+                    verifyBtn.disabled = false;
                 }
             })
             .catch(err => {
-                responseMsg.textContent = "Error verifying OTP.";
-                responseMsg.classList.add('error');
+                responseMsg.textContent = "Error verifying OTP. Please try again.";
+                responseMsg.className = 'msg error';
+                verifyText.style.display = 'block';
+                verifySpinner.style.display = 'none';
+                verifyBtn.disabled = false;
             });
         });
 
+        // Resend OTP
         resendBtn.addEventListener('click', () => {
+            // Show loading state
+            resendText.style.display = 'none';
+            resendSpinner.style.display = 'block';
             resendBtn.disabled = true;
-            resendBtn.textContent = "Resending...";
 
             fetch('/ajax/resend-otp', {
                 method: 'POST'
             })
             .then(res => res.json())
             .then(data => {
-                resendBtn.disabled = false;
-                resendBtn.textContent = "Resend OTP";
                 responseMsg.textContent = data.message;
-                responseMsg.className = 'msg';
-                responseMsg.classList.add(data.success ? 'success' : 'error');
+                responseMsg.className = `msg ${data.success ? 'success' : 'error'}`;
+                
+                if (data.success) {
+                    // Reset timer
+                    timeLeft = 60;
+                    timer.style.display = 'block';
+                    resendBtn.disabled = true;
+                    
+                    const timerInterval = setInterval(() => {
+                        timeLeft--;
+                        timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            timer.style.display = 'none';
+                            resendBtn.disabled = false;
+                        }
+                    }, 1000);
+                }
+                
+                resendText.style.display = 'block';
+                resendSpinner.style.display = 'none';
+                resendBtn.disabled = !data.success;
             })
             .catch(err => {
-                resendBtn.disabled = false;
-                resendBtn.textContent = "Resend OTP";
-                responseMsg.textContent = "Error resending OTP.";
+                responseMsg.textContent = "Error resending OTP. Please try again.";
                 responseMsg.className = 'msg error';
+                resendText.style.display = 'block';
+                resendSpinner.style.display = 'none';
+                resendBtn.disabled = false;
             });
         });
     </script>

@@ -1,52 +1,185 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<section class="max-w-5xl mx-auto mt-20 px-6 py-12 bg-gray-900 text-white rounded-2xl shadow-xl animate__animated animate__fadeIn">
-  <div class="flex flex-col md:flex-row gap-10 items-center justify-between">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
 
-    <!-- Product Image -->
-    <div class="w-full md:w-1/2">
-      <img src="{{ product.image_url if product.image_url else url_for('static', filename='images/placeholder.png') }}"
-           alt="{{ product.name }}"
-           class="w-full h-80 object-cover rounded-xl shadow-lg border border-gray-700">
+<section class="max-w-6xl mx-auto mt-10 px-4 sm:px-6 py-12 bg-gray-900/80 backdrop-blur-sm text-white rounded-3xl shadow-2xl border border-gray-700/50 animate__animated animate__fadeIn">
+  <div class="flex flex-col lg:flex-row gap-12 items-center">
+
+    <!-- Product Image Gallery -->
+    <div class="w-full lg:w-1/2 relative group">
+      <div class="overflow-hidden rounded-2xl shadow-2xl border-2 border-gray-700/30">
+        <img src="{{ product.image_url if product.image_url else url_for('static', filename='images/placeholder.png') }}"
+             alt="{{ product.name }}"
+             class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+      </div>
+      
+      <!-- Image Badge -->
+      <div class="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+        <lord-icon
+          src="https://cdn.lordicon.com/ggihhudh.json"
+          trigger="hover"
+          colors="primary:#121331,secondary:#ffffff"
+          style="width:20px;height:20px">
+        </lord-icon>
+        Featured
+      </div>
     </div>
 
     <!-- Product Info -->
-    <div class="flex-1 space-y-5 text-center md:text-left">
-      <h2 class="text-4xl font-bold text-yellow-400">{{ product.name }}</h2>
-      <p class="text-lg text-gray-300">{{ product.description }}</p>
-      <p class="text-2xl font-semibold text-white">₹{{ product.price }}</p>
+    <div class="flex-1 space-y-6">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mb-2">
+          {{ product.name }}
+        </h1>
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="flex items-center text-yellow-400">
+            {% for i in range(5) %}
+              <i class="fas fa-star{% if i >= product.rating|int %} text-gray-600{% endif %}"></i>
+            {% endfor %}
+            <span class="ml-2 text-white">({{ product.review_count }} reviews)</span>
+          </div>
+          <span class="text-green-400 flex items-center">
+            <i class="fas fa-check-circle mr-1"></i> In Stock
+          </span>
+        </div>
+      </div>
 
-      <!-- Buttons -->
-      <div class="flex flex-wrap gap-4 justify-center md:justify-start mt-6">
-        
-        <!-- Add to Cart -->
-        <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="px-6 py-2 bg-yellow-400 text-black font-semibold rounded hover:bg-yellow-300 transition">
-            🛒 Add to Cart
+      <p class="text-xl text-gray-300 leading-relaxed">
+        {{ product.description }}
+      </p>
+
+      <div class="flex items-baseline space-x-4 mt-6">
+        <p class="text-4xl font-bold text-white">₹{{ product.price }}</p>
+        {% if product.original_price %}
+          <p class="text-xl text-gray-400 line-through">₹{{ product.original_price }}</p>
+          <span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-sm">
+            {{ ((1 - (product.price|float / product.original_price|float)) * 100)|round|int }}% OFF
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 space-y-4">
+        <div class="flex flex-wrap gap-4">
+          <!-- Add to Cart -->
+          <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}" class="flex-1 min-w-[200px]">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" 
+                    class="w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2">
+              <lord-icon
+                src="https://cdn.lordicon.com/slkvcfos.json"
+                trigger="hover"
+                colors="primary:#121331,secondary:#121331"
+                style="width:24px;height:24px">
+              </lord-icon>
+              <span>Add to Cart</span>
+            </button>
+          </form>
+
+          <!-- Buy Now -->
+          <form method="POST" action="{{ url_for('buy_now', product_id=product.id) }}" class="flex-1 min-w-[200px]">
+            <button type="submit" 
+                    class="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2">
+              <lord-icon
+                src="https://cdn.lordicon.com/iiixgoqp.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                style="width:24px;height:24px">
+              </lord-icon>
+              <span>Buy Now</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Wishlist Button -->
+        <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}" class="w-full">
+          <button type="submit" 
+                  class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2">
+            <lord-icon
+              src="https://cdn.lordicon.com/rjzlnunf.json"
+              trigger="hover"
+              colors="primary:#ffffff,secondary:#ffffff"
+              style="width:24px;height:24px">
+            </lord-icon>
+            <span>Add to Wishlist</span>
           </button>
         </form>
+      </div>
 
-        <!-- Buy Now -->
-        <form method="POST" action="{{ url_for('buy_now', product_id=product.id) }}">
-          <button type="submit" class="px-6 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition">
-            ⚡ Buy Now
-          </button>
-        </form>
-
-        <!-- Add to Wishlist -->
-        <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}">
-  <button type="submit"
-    class="mt-4 inline-block bg-pink-500 hover:bg-pink-400 text-white px-4 py-2 rounded-lg font-semibold shadow transition">
-    ❤️ Add to Wishlist
-  </button>
-</form>
-
-        
+      <!-- Product Details -->
+      <div class="mt-10 pt-6 border-t border-gray-700/50">
+        <h3 class="text-xl font-semibold mb-4 text-yellow-400">Product Details</h3>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+            <span>Free delivery on orders over ₹500</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+            <span>30-day return policy</span>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+            <span>Secure payment options</span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Recommended Products -->
+<section class="max-w-6xl mx-auto mt-16 px-4 sm:px-6">
+  <h2 class="text-3xl font-bold mb-8 text-white flex items-center">
+    <lord-icon
+      src="https://cdn.lordicon.com/wxnxiano.json"
+      trigger="loop"
+      delay="2000"
+      colors="primary:#fbbf24,secondary:#fbbf24"
+      style="width:40px;height:40px">
+    </lord-icon>
+    <span class="ml-2">You May Also Like</span>
+  </h2>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for related in related_products[:4] %}
+    <div class="bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700/50 hover:border-yellow-400/30 transition-all duration-300 transform hover:-translate-y-1">
+      <a href="{{ url_for('view_product', product_id=related.id) }}" class="block">
+        <div class="h-48 overflow-hidden">
+          <img src="{{ related.image_url if related.image_url else url_for('static', filename='images/placeholder.png') }}" 
+               alt="{{ related.name }}" 
+               class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-lg text-white mb-1">{{ related.name }}</h3>
+          <p class="text-yellow-400 font-bold">₹{{ related.price }}</p>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<style>
+  .animate-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add animation to product image on hover
+    const productImg = document.querySelector('.group img');
+    productImg.parentElement.addEventListener('mouseenter', () => {
+      productImg.style.transform = 'scale(1.05)';
+    });
+    productImg.parentElement.addEventListener('mouseleave', () => {
+      productImg.style.transform = 'scale(1)';
+    });
+  });
+</script>
 
 {% endblock %}

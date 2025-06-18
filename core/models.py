@@ -84,6 +84,36 @@ class Product:
         product_list.append(new_product)
         print("Product Added Successfully!! ")
 
+    @staticmethod
+    def update_product(product_list):
+        pid = int(input("Enter Product ID to update: "))
+        for product in product_list:
+            if product.id == pid:
+                print(f"\nEditing Product: {product.name}")
+                product.name = input(
+                    f"New Name (leave blank to keep '{product.name}'): ") or product.name
+                product.price = float(
+                    input(f"New Price (current: {product.price}): ") or product.price)
+                product.category = input(
+                    f"New Category (current: {product.category}): ") or product.category
+                product.description = input(
+                    f"New Description: ") or product.description
+                product.stock = int(
+                    input(f"New Stock (current: {product.stock}): ") or product.stock)
+                print("✅ Product updated successfully!")
+                return
+        print("❌ Product not found!")
+
+    @staticmethod
+    def delete_product(product_list):
+        pid = int(input("Enter Product ID to delete: "))
+        for product in product_list:
+            if product.id == pid:
+                product_list.remove(product)
+                print(f"🗑️ Product '{product.name}' deleted successfully.")
+                return
+        print("❌ Product not found!")
+
 
 class Profile:
     def __init__(self, uname, phno, email, address=""):
@@ -228,17 +258,30 @@ def main():
 
     if user.role == "seller":
         while True:
-            print("\n1. Add Product\n2. View All Products\n3. Exit")
+            print("\n=== Seller Menu ===")
+            print("1. Add Product")
+            print("2. View All Products")
+            print("3. Update Product")
+            print("4. Delete Product")
+            print("5. Exit")
+
             choice = input("Choose an option: ")
 
             if choice == "1":
                 Product.add_product(product_list)
             elif choice == "2":
-                for p in product_list:
-                    p.display()
-                    print("-" * 30)
+                if product_list:
+                    for p in product_list:
+                        p.display()
+                        print("-" * 30)
+                else:
+                    print("No products added yet.")
             elif choice == "3":
-                print("Exiting seller mode.")
+                Product.update_product(product_list)
+            elif choice == "4":
+                Product.delete_product(product_list)
+            elif choice == "5":
+                print("👋 Exiting seller mode.")
                 break
             else:
                 print("❌ Invalid choice")
