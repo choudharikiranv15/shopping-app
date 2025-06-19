@@ -79,29 +79,25 @@ def login():
         password = request.form['password']
 
         conn = sqlite3.connect('database/app.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM profiles WHERE email = ?", (email,))
-        row = cursor.fetchone()
-        conn.close()
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
 
-        if row and check_password_hash(row[8], password):
-            session['user_id'] = row[0]
-            session['user_email'] = row[3]
-            session['otp_verified'] = False
-            session['otp'] = str(random.randint(100000, 999999))
+        # Fetch user and check if seller
+        c.execute(
+            "SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
+        user = c.fetchone()
 
-            try:
-                send_otp_email(row[3], session['otp'])
-                flash("OTP sent to your email", "info")
-            except Exception as e:
-                print(f"Failed to send OTP: {e}")
-                flash("Error sending OTP. Try again later.", "danger")
+        if user:
+            session['user_id'] = user['id']
+            session['role'] = user['role']
 
-            return redirect(url_for('verify_otp'))
+            if user['role'] == 'seller':
+                return redirect(url_for('seller_dashboard'))
+            else:
+                return redirect(url_for('dashboard'))
 
         flash('Invalid credentials', 'danger')
         return redirect(url_for('login'))
-
     return render_template('login.html')
 
 
@@ -774,23 +770,31 @@ def seller_register():
         email = request.form['email']
         phone = request.form['phone']
         password = request.form['password']
+        business_name = request.form['business_name']
+        gst_number = request.form['gst_number']
+        address = request.form['address']
 
         conn = sqlite3.connect('database/app.db')
         c = conn.cursor()
 
+        # Check if already registered
         c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
         if c.fetchone():
             flash("Email already registered", "danger")
             conn.close()
             return redirect(url_for('seller_register'))
 
-        c.execute("INSERT INTO sellers (name, email, phone, password) VALUES (?, ?, ?, ?)",
-                  (name, email, phone, password))
+        # Insert new seller with documents
+        c.execute("""
+            INSERT INTO sellers (name, email, phone, password, business_name, gst_number, address)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (name, email, phone, password, business_name, gst_number, address))
         conn.commit()
         conn.close()
 
         flash("Seller registered successfully. Please login.", "success")
         return redirect(url_for('seller_login'))
+
     return render_template('seller_register.html')
 
 
@@ -808,10 +812,12 @@ def seller_login():
         conn.close()
 
         if seller:
+            session.clear()
             session['seller_id'] = seller[0]
             session['seller_name'] = seller[1]
+            session['role'] = 'seller'
             flash("Login successful!", "success")
-            return redirect(url_for('seller_dashboard'))
+            return redirect(url_for('seller/dashboard.html'))
         else:
             flash("Invalid credentials", "danger")
 
@@ -820,32 +826,25 @@ def seller_login():
 
 @app.route('/seller_dashboard')
 def seller_dashboard():
-    if 'seller_id' not in session:
+    if session.get('role') != 'seller' or 'seller_id' not in session:
+        flash("Access denied. Seller login required.", "warning")
         return redirect(url_for('seller_login'))
 
-    seller_id = session['seller_id']
+    # Dashboard logic (e.g., list of products)
     conn = sqlite3.connect('database/app.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-
-    # Fetch products with order counts
-    c.execute("""
-        SELECT p.*, 
-               COALESCE(SUM(oi.quantity), 0) AS total_orders
-        FROM products p
-        LEFT JOIN order_items oi ON p.name = oi.product_name
-        WHERE p.seller_id = ?
-        GROUP BY p.id
-    """, (seller_id,))
+    c.execute("SELECT * FROM products WHERE seller_id = ?",
+              (session['seller_id'],))
     products = c.fetchall()
     conn.close()
 
-    return render_template('seller_dashboard.html', products=products)
+    return render_template('seller/dashboard.html', products=products)
 
 
 @app.route('/seller/add_product', methods=['GET', 'POST'])
 def seller_add_product():
-    if 'seller_id' not in session:
+    if session.get('role') != 'seller' or 'seller_id' not in session:
         return redirect(url_for('seller_login'))
 
     if request.method == 'POST':
@@ -871,32 +870,26 @@ def seller_add_product():
     return render_template('seller/add_product.html')
 
 
-@app.route('/seller_logout')
-def seller_logout():
-    session.pop('seller_id', None)
-    session.pop('seller_name', None)
-    flash("Logged out successfully.", "info")
-    return redirect(url_for('seller_login'))
-
-
 @app.route('/seller/edit_product/<int:product_id>', methods=['GET', 'POST'])
 def seller_edit_product(product_id):
-    if 'seller_id' not in session:
+    if session.get('role') != 'seller' or 'seller_id' not in session:
         return redirect(url_for('seller_login'))
 
     conn = sqlite3.connect('database/app.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     if request.method == 'POST':
         name = request.form['name']
-        price = request.form['price']
+        price = float(request.form['price'])
         category = request.form['category']
         description = request.form['description']
-        stock = request.form['stock']
-        image_url = request.form['image_url']
+        stock = int(request.form['stock'])
+        image_url = request.form.get('image_url', '')
 
         c.execute("""
-            UPDATE products SET name = ?, price = ?, category = ?, description = ?, stock = ?, image_url = ?
+            UPDATE products
+            SET name = ?, price = ?, category = ?, description = ?, stock = ?, image_url = ?
             WHERE id = ? AND seller_id = ?
         """, (name, price, category, description, stock, image_url, product_id, session['seller_id']))
         conn.commit()
@@ -911,7 +904,7 @@ def seller_edit_product(product_id):
     conn.close()
 
     if not product:
-        flash("Product not found or unauthorized.", "danger")
+        flash("Product not found or unauthorized access.", "danger")
         return redirect(url_for('seller_dashboard'))
 
     return render_template('seller/edit_product.html', product=product)
@@ -919,7 +912,7 @@ def seller_edit_product(product_id):
 
 @app.route('/seller/delete_product/<int:product_id>')
 def seller_delete_product(product_id):
-    if 'seller_id' not in session:
+    if session.get('role') != 'seller' or 'seller_id' not in session:
         return redirect(url_for('seller_login'))
 
     conn = sqlite3.connect('database/app.db')
@@ -932,6 +925,14 @@ def seller_delete_product(product_id):
     flash("Product deleted successfully!", "info")
     return redirect(url_for('seller_dashboard'))
 
+
+@app.route('/seller_logout')
+def seller_logout():
+    session.pop('seller_id', None)
+    session.pop('seller_name', None)
+    session.pop('role', None)
+    flash("Logged out from seller account.", "info")
+    return redirect(url_for('seller_login'))
 
 # Address Routes
 

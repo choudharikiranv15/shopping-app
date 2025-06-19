@@ -136,6 +136,14 @@
             <i class="fas fa-heart"></i>
             <span class="hidden lg:inline-block">Wishlist</span>
           </a>
+
+          {% if session.get('role') == 'seller' %}
+  <a href="{{ url_for('seller_dashboard') }}" class="group flex items-center space-x-1 text-purple-400 hover:text-purple-300 transition-colors">
+    <i class="fas fa-store"></i>
+    <span class="hidden lg:inline-block">Seller Panel</span>
+  </a>
+{% endif %}
+
         </div>
       </nav>
 
@@ -167,6 +175,12 @@
       <a href="{{ url_for('wishlist') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700 text-accent-400">
         <i class="fas fa-heart mr-2"></i> Wishlist
       </a>
+      <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+        <i class="fas fa-user-tag mr-2"></i> Customer Role
+      </a>
+      <a href="{{ url_for('seller_dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+        <i class="fas fa-store mr-2"></i> Seller Role
+      </a>
     </div>
   </div>
 </header>
@@ -176,10 +190,9 @@
   {% block content %}{% endblock %}
 </main>
 
-<!-- Footer -->
+<!-- Footer and Scripts -->
 <footer class="bg-dark-800 mt-20">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-    <!-- Brand Info -->
     <div class="space-y-4">
       <div class="flex items-center space-x-3">
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ShopEase Logo" class="h-12 w-12 rounded-full">
@@ -189,22 +202,12 @@
       </div>
       <p class="text-gray-400">Your premium shopping destination with the best prices and quality products.</p>
       <div class="flex space-x-4">
-        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
-          <i class="fab fa-facebook-f"></i>
-        </a>
-        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
-          <i class="fab fa-twitter"></i>
-        </a>
-        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
-          <i class="fab fa-instagram"></i>
-        </a>
-        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors">
-          <i class="fab fa-linkedin-in"></i>
-        </a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="text-gray-400 hover:text-accent-400 transition-colors"><i class="fab fa-linkedin-in"></i></a>
       </div>
     </div>
-
-    <!-- Quick Links -->
     <div class="space-y-4">
       <h4 class="text-lg font-semibold font-montserrat text-accent-400">Quick Links</h4>
       <ul class="space-y-2">
@@ -214,93 +217,38 @@
         <li><a href="/dashboard" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a></li>
       </ul>
     </div>
-
-    <!-- Contact Info -->
     <div class="space-y-4">
       <h4 class="text-lg font-semibold font-montserrat text-accent-400">Contact Us</h4>
-      <div class="space-y-2 text-gray-400">
-        <p class="flex items-center"><i class="fas fa-envelope mr-3 text-accent-400"></i> support@shopease.com</p>
-        <p class="flex items-center"><i class="fas fa-phone-alt mr-3 text-accent-400"></i> +91 98765 43210</p>
-        <p class="flex items-center"><i class="fas fa-map-marker-alt mr-3 text-accent-400"></i> Bengaluru, India</p>
-      </div>
+      <p class="flex items-center text-gray-400"><i class="fas fa-envelope mr-3 text-accent-400"></i> support@shopease.com</p>
+      <p class="flex items-center text-gray-400"><i class="fas fa-phone-alt mr-3 text-accent-400"></i> +91 98765 43210</p>
+      <p class="flex items-center text-gray-400"><i class="fas fa-map-marker-alt mr-3 text-accent-400"></i> Bengaluru, India</p>
     </div>
   </div>
-
   <div class="bg-dark-900 py-4 text-center text-sm text-gray-500">
     &copy; 2025 <strong class="text-accent-400">ShopEase</strong>. All rights reserved. | Made with <i class="fas fa-heart text-red-500"></i> in India
   </div>
 </footer>
 
-<!-- Scripts -->
 <script>
-  // Mobile menu toggle
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
-  
-  mobileMenuButton.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-  });
+  mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-  // Theme toggle
-  const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = document.getElementById('theme-icon');
-  
-  themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-    
-    if (document.documentElement.classList.contains('dark')) {
-      themeIcon.classList.replace('fa-sun', 'fa-moon');
-    } else {
-      themeIcon.classList.replace('fa-moon', 'fa-sun');
-    }
-  });
-
-  // Check for saved theme preference
-  if (localStorage.getItem('darkMode') === 'false') {
-    document.documentElement.classList.remove('dark');
-    themeIcon.classList.replace('fa-moon', 'fa-sun');
-  }
-
-  // Ripple effect for buttons
-  document.querySelectorAll('button, a').forEach(element => {
-    element.addEventListener('click', function(e) {
+  document.querySelectorAll('button, a').forEach(el => {
+    el.addEventListener('click', function(e) {
       if (this.classList.contains('no-ripple')) return;
-      
       const rect = this.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
       const ripple = document.createElement('span');
       ripple.classList.add('ripple');
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
+      ripple.style.left = `${x}px`; ripple.style.top = `${y}px`;
+      this.appendChild(ripple); setTimeout(() => ripple.remove(), 600);
     });
   });
 
-  // GSAP animations for page elements
   document.addEventListener('DOMContentLoaded', () => {
-    gsap.from('header', { 
-      y: -50, 
-      opacity: 0, 
-      duration: 0.8, 
-      ease: "power2.out" 
-    });
-    
-    gsap.from('main > *', {
-      y: 30,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.6,
-      delay: 0.3,
-      ease: "back.out"
-    });
+    gsap.from('header', { y: -50, opacity: 0, duration: 0.8, ease: "power2.out" });
+    gsap.from('main > *', { y: 30, opacity: 0, stagger: 0.1, duration: 0.6, delay: 0.3, ease: "back.out" });
   });
 </script>
 </body>

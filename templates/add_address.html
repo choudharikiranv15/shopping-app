@@ -1,79 +1,97 @@
 {% extends "layout.html" %}
 {% block content %}
-<section class="min-h-screen bg-gray-900 text-white py-10 px-4">
-  <div class="max-w-xl mx-auto bg-gray-800 rounded-xl shadow-xl p-8">
-    <h2 class="text-3xl font-bold text-pink-400 mb-6 text-center">➕ Add New Address</h2>
 
-    <form method="POST" class="space-y-6">
+<section class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white py-12 px-4 animate-gradient-x">
+  <div class="max-w-md mx-auto">
+    <!-- Animated Header -->
+    <div class="mb-10 text-center">
+      <h2 class="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 animate-text-glow">
+        ✨ Add New Address
+      </h2>
+      <div class="w-20 h-1 bg-gradient-to-r from-pink-500 to-purple-500 mx-auto rounded-full animate-line-grow"></div>
+      <p class="text-gray-400 mt-3">Where should we deliver your order?</p>
+    </div>
 
-      <!-- Full Name -->
-      <div class="relative">
-        <input type="text" name="name" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="Full Name" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
+    <!-- Floating Form Card -->
+    <div class="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-2xl p-8 border border-purple-500/20 transform transition-all duration-500 hover:shadow-purple-500/20 animate-float-in">
+      <form method="POST" class="space-y-6">
 
-      <!-- Street Address -->
-      <div class="relative">
-        <input type="text" name="street" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="Street Address" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
+        <!-- Floating Label Input Fields -->
+        {% macro floating_input(name, placeholder, type="text", pattern=None) %}
+        <div class="relative group">
+          <input type="{{ type }}" name="{{ name }}" required
+                 class="peer w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                 placeholder=" " {% if pattern %}pattern="{{ pattern }}"{% endif %}>
+          <label class="absolute left-3 top-3 px-1 text-gray-400 transition-all duration-200 transform -translate-y-6 scale-75 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 bg-gray-800/50 peer-placeholder-shown:bg-transparent">
+            {{ placeholder }}
+          </label>
+        </div>
+        {% endmacro %}
 
-      <!-- City -->
-      <div class="relative">
-        <input type="text" name="city" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="City" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
+        {{ floating_input("name", "Full Name") }}
+        {{ floating_input("street", "Street Address") }}
+        {{ floating_input("city", "City") }}
+        {{ floating_input("state", "State") }}
+        {{ floating_input("pincode", "Pincode") }}
+        {{ floating_input("phone", "Phone Number", type="tel", pattern="[0-9]{10}") }}
 
-      <!-- State -->
-      <div class="relative">
-        <input type="text" name="state" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="State" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
+        <!-- Submit Button with Animation -->
+        <div class="pt-4 text-center">
+          <button type="submit" 
+                  class="relative overflow-hidden group bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              💾 Save Address
+            </span>
+            <span class="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-all duration-500 transform -translate-x-full group-hover:translate-x-0"></span>
+          </button>
+        </div>
 
-      <!-- Pincode -->
-      <div class="relative">
-        <input type="text" name="pincode" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="Pincode" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
-
-      <!-- Phone -->
-      <div class="relative">
-        <input type="tel" name="phone" pattern="[0-9]{10}" required
-               class="peer w-full bg-transparent border border-gray-600 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500"
-               placeholder="Phone Number" />
-        <label class="absolute left-4 top-3 text-gray-400 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-[-12px] peer-focus:text-sm peer-focus:text-pink-400">
-          
-        </label>
-      </div>
-
-      <!-- Submit -->
-      <div class="text-center">
-        <button type="submit" class="bg-pink-500 hover:bg-pink-400 text-white font-medium px-6 py-3 rounded-lg transition">
-          💾 Save Address
-        </button>
-      </div>
-
-    </form>
+      </form>
+    </div>
   </div>
 </section>
+
+<style>
+  @keyframes float-in {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes text-glow {
+    0% { text-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
+    50% { text-shadow: 0 0 20px rgba(192, 132, 252, 0.7); }
+    100% { text-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
+  }
+  @keyframes line-grow {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-float-in {
+    animation: float-in 0.6s ease-out both;
+  }
+  .animate-text-glow {
+    animation: text-glow 3s ease infinite;
+  }
+  .animate-line-grow {
+    animation: line-grow 0.8s ease-out forwards;
+  }
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 12s ease infinite;
+  }
+
+  /* Floating label magic */
+  .peer:focus ~ .peer-focus\:scale-75 {
+    transform: scale(0.75);
+  }
+  .peer:focus ~ .peer-focus\:-translate-y-6 {
+    transform: translateY(-1.5rem);
+  }
+</style>
+
 {% endblock %}
