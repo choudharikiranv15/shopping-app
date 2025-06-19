@@ -1,150 +1,155 @@
-# 🛒 ShopEase – E-Commerce Web App
+# 🍒 ShopEase – E-Commerce Web Application
 
-**ShopEase** is a user-friendly, full-stack e-commerce web application built with **Flask (Python)** on the backend and a **responsive TailwindCSS** frontend. The platform allows users to register/login with OTP, browse products, add to cart, and manage their purchases with a smooth UI/UX experience.
-
----
-
-## 🌟 Features
-
-- 🔐 **User Authentication with OTP**
-- 🗝️ **Forgot Password via OTP Email**
-- 🛍️ **Product Browsing by Categories**
-- ➕ **Add to Cart with Quantity Tracking**
-- 🛒 **Cart Page with Dynamic Data**
-- 💡 **Light & Dark Mode Toggle**
-- 🎨 **Modern UI with Tailwind & Animate.css**
-- 📧 **Email Integration via SMTP**
-- ✅ **Responsive Design**
+ShopEase is a feature-rich, full-stack e-commerce web application built using **Flask**, **SQLite**, **HTML/CSS/JS**, and **TailwindCSS**. It supports both **customer** and **seller** functionalities, allowing users to browse, search, review, and purchase products, while sellers can manage their products and view order statistics.
 
 ---
 
-## 🧑‍💻 Tech Stack
+## 🚀 Features
 
-### 🚀 Frontend
-- **HTML, CSS, JavaScript**
-- **TailwindCSS** for utility-first styling
-- **Animate.css** for UI animations
+### 👤 Customer Side
 
-### ⚙️ Backend
-- **Python 3**
-- **Flask** web framework
-- **SQLite** lightweight relational DB
+* 📿 Register & Login (with OTP verification)
+* 🔍 Browse, search, and view products
+* 🛒 Add to Cart and adjust quantity
+* ❤️ Add to Wishlist
+* 💳 Buy Now & Checkout
+* 💰 Payment Page (COD, Card, UPI, Netbanking)
+* 📿 Order Confirmation Page
+* 📦 Order History with product summary
+* ✍️ Submit Reviews
+* 🟡‍↗️ Edit Profile & Address
 
-### 💌 Email + Extras
-- **SMTP + smtplib** for OTP-based email verification
-- **AJAX (Planned)** for dynamic OTP validation
-- **Flask Sessions** for cart tracking
+### 🧑‍🏫 Seller Side
+
+* 📝 Seller Registration & Login
+* ➕ Add Products with images
+* 📋 View & Manage Products
+* 📦 View Order Count Per Product (Dashboard)
+* 📊 Product Analytics (basic)
+
+---
+
+## 🧱 Tech Stack
+
+| Layer    | Technologies                                          |
+| -------- | ----------------------------------------------------- |
+| Frontend | HTML5, TailwindCSS, Vanilla JS, Animate.css, Lordicon |
+| Backend  | Python (Flask)                                        |
+| Database | SQLite                                                |
+| Auth     | OTP Verification (Email-based)                        |
+| UI/UX    | Fully responsive, Dark mode, Smooth animations        |
+
+---
+
+## 📁 Project Structure
+
+```
+project/
+│
+├── templates/                  # All HTML templates
+│   ├── layout.html             # Base layout
+│   ├── index.html              # Homepage
+│   ├── product_detail.html     # Product info
+│   ├── orders.html             # Order history page
+│   ├── wishlist.html           # Wishlist page
+│   ├── seller_dashboard.html   # Seller dashboard
+│   └── ...
+│
+├── static/
+│   ├── css/                    # Custom styles (if any)
+│   └── images/                 # Product and placeholder images
+│
+├── database/
+│   └── app.db                  # SQLite database
+│
+├── app.py                      # Main Flask application
+├── core/                       # Modular Python helpers
+│   ├── db_helper.py
+│   ├── otp_helper.py
+│   └── user_helper.py
+│
+└── README.md                   # Project documentation
+```
+
+---
+
+## 🔑 Seller Login Access
+
+* Seller login is **separate** from user login.
+* Seller credentials are stored in a dedicated table.
+* Route: `/seller_login`
+* Dashboard: `/seller_dashboard`
 
 ---
 
 ## 🛠️ Setup Instructions
 
-Follow these steps to run the app locally:
+1. **Clone the repo:**
 
-### 1. Clone the Repository
+   ```bash
+   git clone https://github.com/your-username/shopease.git
+   cd shopease
+   ```
 
-```bash
-git clone https://github.com/your-username/shopease.git
-cd shopease
+2. **Create a virtual environment and activate it:**
 
-2. Create a Virtual Environment & Activate
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   ```
 
-python -m venv venv
-venv\Scripts\activate   # Windows
+3. **Install dependencies:**
 
-3. Install Required Dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-pip install -r requirements.txt
+4. **Run the application:**
 
-4. Ensure the SQLite Database Exists
+   ```bash
+   python app.py
+   ```
 
-Make sure app.db is located at:
+5. **Access in browser:**
 
-/database/app.db
-
-If not, create it using a SQLite browser or helper script and include the following tables:
-
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    email TEXT,
-    password TEXT
-);
-
-CREATE TABLE products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    description TEXT,
-    price REAL,
-    category TEXT,
-    image TEXT
-);
-
-CREATE TABLE cart (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    product_id INTEGER,
-    quantity INTEGER
-);
-
-5. Run the Flask App
-
-python app.py
-
-6. Visit in Browser
-
-http://127.0.0.1:5000
-
+   ```
+   http://127.0.0.1:5000
+   ```
 
 ---
 
-📁 Project Structure
+## 🔐 Security Features
 
-shopease/
-│
-├── app.py                      # Main Flask app
-├── /core                       # Helper modules
-│   ├── otp_helper.py
-│   ├── db_helper.py
-│   └── user_helper.py
-│
-├── /templates                  # HTML templates
-│   ├── layout.html             # Shared layout
-│   ├── index.html              # Homepage
-│   ├── cart.html               # Cart page
-│   ├── login.html              # User login
-│   ├── register.html           # User signup
-│   ├── forgot_password.html    # OTP reset
-│   └── verify_otp.html
-│
-├── /static                     # Static files
-│   ├── /css/
-│   ├── /js/
-│   └── /images/
-│       ├── logo.png
-│       ├── placeholder.png
-│       └── empty-cart.svg
-│
-├── /database/
-│   └── app.db                  # SQLite database
-│
-├── requirements.txt            # Required Python packages
-└── README.md                   # This file
-
+* OTP-based authentication
+* Session handling for user & seller
+* Form validation
+* Wishlist access restricted to logged-in users
 
 ---
 
-🧪 Features in Action
+## 📸 Screenshots
 
-Users register/login using email OTP
+* 🏠 Homepage
+* 🛒 Product Detail
+* ✅ Order Confirmation
+* 📿 Seller Dashboard
 
-Products are dynamically displayed on homepage
+---
 
-Cart persists across sessions (based on user ID)
+## 🧠 Future Improvements
 
-Products added to the cart are stored in the DB
+* 🔐 JWT-based API auth
+* 📿 PDF Invoice generation
+* 📦 Admin panel
+* 📊 Sales analytics for sellers
+* 📱 PWA support for mobile
 
-Empty cart displays an animated placeholder with a call-to-action button
+---
 
-🧡 Thank you for checking out ShopEase!
-Made with ♥️ by Kiran Choudhari
+## 🙌 Credits
+
+Built with ❤️ by [Kiran Choudhari](https://www.linkedin.com/in/kiranchoudhari-1510m/)
+
+---
+
+##
