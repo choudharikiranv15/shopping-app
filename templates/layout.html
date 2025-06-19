@@ -128,10 +128,18 @@
             <i class="fas fa-user"></i>
             <span class="hidden lg:inline-block">Profile</span>
           </a>
-          <a href="{{ url_for('dashboard') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
-            <i class="fas fa-tachometer-alt"></i>
-            <span class="hidden lg:inline-block">Dashboard</span>
-          </a>
+          {% if session.get('role') == 'seller' %}
+  <a href="{{ url_for('seller_dashboard') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
+    <i class="fas fa-store"></i>
+    <span class="hidden lg:inline-block">Seller Dashboard</span>
+  </a>
+{% else %}
+  <a href="{{ url_for('dashboard') }}" class="group flex items-center space-x-1 hover:text-accent-400 transition-colors">
+    <i class="fas fa-tachometer-alt"></i>
+    <span class="hidden lg:inline-block">Dashboard</span>
+  </a>
+{% endif %}
+
           <a href="{{ url_for('wishlist') }}" class="group flex items-center space-x-1 text-accent-400 hover:text-accent-300 transition-colors">
             <i class="fas fa-heart"></i>
             <span class="hidden lg:inline-block">Wishlist</span>
@@ -169,9 +177,16 @@
       <a href="{{ url_for('profile') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
         <i class="fas fa-user mr-2"></i> Profile
       </a>
-      <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
-        <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
-      </a>
+     {% if session.get('role') == 'seller' %}
+  <a href="{{ url_for('seller_dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+    <i class="fas fa-store mr-2"></i> Seller Dashboard
+  </a>
+{% else %}
+  <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700">
+    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+  </a>
+{% endif %}
+
       <a href="{{ url_for('wishlist') }}" class="px-3 py-2 rounded-lg hover:bg-dark-700 text-accent-400">
         <i class="fas fa-heart mr-2"></i> Wishlist
       </a>

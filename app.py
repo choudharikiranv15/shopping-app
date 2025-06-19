@@ -805,6 +805,7 @@ def seller_login():
         password = request.form['password']
 
         conn = sqlite3.connect('database/app.db')
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute(
             "SELECT id, name FROM sellers WHERE email = ? AND password = ?", (email, password))
@@ -812,12 +813,12 @@ def seller_login():
         conn.close()
 
         if seller:
-            session.clear()
-            session['seller_id'] = seller[0]
-            session['seller_name'] = seller[1]
-            session['role'] = 'seller'
-            flash("Login successful!", "success")
-            return redirect(url_for('seller/dashboard.html'))
+            session.clear()  # Clear previous user or seller session
+            session['seller_id'] = seller['id']
+            session['seller_name'] = seller['name']
+            session['role'] = 'seller'  # Important for role-based access
+            flash("Seller login successful!", "success")
+            return redirect(url_for('seller_dashboard'))
         else:
             flash("Invalid credentials", "danger")
 
@@ -826,11 +827,11 @@ def seller_login():
 
 @app.route('/seller_dashboard')
 def seller_dashboard():
+    # Ensure only logged-in sellers with proper role can access
     if session.get('role') != 'seller' or 'seller_id' not in session:
         flash("Access denied. Seller login required.", "warning")
         return redirect(url_for('seller_login'))
 
-    # Dashboard logic (e.g., list of products)
     conn = sqlite3.connect('database/app.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()

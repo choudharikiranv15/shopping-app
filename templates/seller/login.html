@@ -1,11 +1,41 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="max-w-md mx-auto bg-gray-800 text-white p-8 rounded-lg shadow mt-16">
-  <h2 class="text-3xl font-bold mb-6">Seller Login</h2>
+
+<div class="max-w-md mx-auto bg-gray-800 text-white p-8 rounded-lg shadow-lg mt-24">
+
+  <h2 class="text-3xl font-bold mb-6 text-center">Seller Login</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="space-y-3 mb-4">
+        {% for category, message in messages %}
+          <div class="px-4 py-2 rounded text-sm 
+                      {% if category == 'success' %} bg-green-100 text-green-800 
+                      {% elif category == 'danger' %} bg-red-100 text-red-800 
+                      {% elif category == 'warning' %} bg-yellow-100 text-yellow-800 
+                      {% else %} bg-gray-100 text-gray-800 {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   <form method="POST">
-    <input name="email" type="email" placeholder="Email" required class="w-full p-2 rounded mb-4 bg-gray-700">
-    <input name="password" type="password" placeholder="Password" required class="w-full p-2 rounded mb-4 bg-gray-700">
-    <button class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded">Login</button>
+    <label class="block text-sm mb-1" for="email">Email</label>
+    <input id="email" name="email" type="email" placeholder="you@example.com" required 
+           class="w-full p-2 rounded mb-4 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+
+    <label class="block text-sm mb-1" for="password">Password</label>
+    <input id="password" name="password" type="password" placeholder="Password" required 
+           class="w-full p-2 rounded mb-6 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+
+    <button type="submit" 
+            class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-4 py-2 rounded transition duration-300">
+      Login
+    </button>
   </form>
+
 </div>
+
 {% endblock %}
