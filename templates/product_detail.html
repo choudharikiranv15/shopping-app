@@ -36,9 +36,9 @@
         <div class="flex items-center space-x-4 mb-4">
           <div class="flex items-center text-yellow-400">
             {% for i in range(5) %}
-              <i class="fas fa-star{% if i >= product.rating|int %} text-gray-600{% endif %}"></i>
+              <i class="fas fa-star{% if i >= (product.rating | default(0) | int) %} text-gray-600{% endif %}"></i>
             {% endfor %}
-            <span class="ml-2 text-white">({{ product.review_count }} reviews)</span>
+            <span class="ml-2 text-white">({{ product.review_count | default(0) }} reviews)</span>
           </div>
           <span class="text-green-400 flex items-center">
             <i class="fas fa-check-circle mr-1"></i> In Stock
@@ -173,12 +173,14 @@
   document.addEventListener('DOMContentLoaded', () => {
     // Add animation to product image on hover
     const productImg = document.querySelector('.group img');
-    productImg.parentElement.addEventListener('mouseenter', () => {
-      productImg.style.transform = 'scale(1.05)';
-    });
-    productImg.parentElement.addEventListener('mouseleave', () => {
-      productImg.style.transform = 'scale(1)';
-    });
+    if (productImg) {
+      productImg.parentElement.addEventListener('mouseenter', () => {
+        productImg.style.transform = 'scale(1.05)';
+      });
+      productImg.parentElement.addEventListener('mouseleave', () => {
+        productImg.style.transform = 'scale(1)';
+      });
+    }
   });
 </script>
 

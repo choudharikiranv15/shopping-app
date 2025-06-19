@@ -8,17 +8,22 @@
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-hover: #3a56d4;
-            --success: #4cc9f0;
-            --error: #f72585;
-            --text: #2b2d42;
-            --light: #f8f9fa;
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --success: #10b981;
+            --error: #ef4444;
+            --text: #e2e8f0;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --input-bg: #334155;
+            --input-border: #475569;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -29,16 +34,17 @@
         }
         
         .otp-container {
-            background: white;
+            background: var(--card-bg);
             padding: 40px;
             width: 100%;
             max-width: 450px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
             transform: translateY(20px);
             opacity: 0;
             animation: fadeInUp 0.6s ease-out forwards;
+            border: 1px solid var(--card-border);
         }
         
         @keyframes fadeInUp {
@@ -60,7 +66,7 @@
         }
         
         .otp-header p {
-            color: #6c757d;
+            color: #94a3b8;
             font-size: 14px;
         }
         
@@ -77,19 +83,22 @@
             text-align: center;
             font-size: 20px;
             font-weight: 600;
-            border: 2px solid #e9ecef;
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
             border-radius: 8px;
             transition: all 0.3s;
+            color: var(--text);
         }
         
         .otp-input:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
         }
         
         .otp-input.filled {
             border-color: var(--primary);
+            background-color: rgba(139, 92, 246, 0.1);
         }
         
         .btn {
@@ -125,7 +134,7 @@
         }
         
         .btn-secondary:hover {
-            background-color: rgba(67, 97, 238, 0.1);
+            background-color: rgba(139, 92, 246, 0.1);
         }
         
         .btn:disabled {
@@ -164,18 +173,20 @@
         
         .msg.success {
             display: block;
-            background-color: rgba(76, 201, 240, 0.1);
+            background-color: rgba(16, 185, 129, 0.1);
             color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
         .msg.error {
             display: block;
-            background-color: rgba(247, 37, 133, 0.1);
+            background-color: rgba(239, 68, 68, 0.1);
             color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
         .timer {
-            color: #6c757d;
+            color: #94a3b8;
             font-size: 14px;
             margin-top: 15px;
         }
@@ -188,7 +199,7 @@
                 src="https://cdn.lordicon.com/wloilxuq.json"
                 trigger="loop"
                 delay="2000"
-                colors="primary:#4361ee,secondary:#4361ee"
+                colors="primary:#8b5cf6,secondary:#8b5cf6"
                 style="width:80px;height:80px">
             </lord-icon>
             <h2>Verify Your Identity</h2>
