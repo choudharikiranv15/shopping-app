@@ -44,7 +44,8 @@
       <div class="relative overflow-hidden h-64">
         <img src="{{ product.image_url if product.image_url else url_for('static', filename='images/placeholder.png') }}" 
              alt="{{ product.name }}" 
-             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+             onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/placeholder.png') }}';">
         <div class="absolute inset-0 bg-gradient-to-t from-dark-900/80 to-transparent"></div>
       </div>
       

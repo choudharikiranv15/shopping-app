@@ -206,6 +206,19 @@
             <p>We've sent a 6-digit code to your email/phone</p>
         </div>
         
+        {% if is_seller_otp %}
+        <form method="POST" action="{{ otp_action }}">
+            <div class="otp-input-container">
+                <input type="text" name="otp1" class="otp-input" maxlength="1" required autofocus>
+                <input type="text" name="otp2" class="otp-input" maxlength="1" required>
+                <input type="text" name="otp3" class="otp-input" maxlength="1" required>
+                <input type="text" name="otp4" class="otp-input" maxlength="1" required>
+                <input type="text" name="otp5" class="otp-input" maxlength="1" required>
+                <input type="text" name="otp6" class="otp-input" maxlength="1" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Verify OTP</button>
+        </form>
+        {% else %}
         <div class="otp-input-container">
             <input type="text" class="otp-input" maxlength="1" data-index="1" autofocus>
             <input type="text" class="otp-input" maxlength="1" data-index="2">
@@ -214,168 +227,167 @@
             <input type="text" class="otp-input" maxlength="1" data-index="5">
             <input type="text" class="otp-input" maxlength="1" data-index="6">
         </div>
-        
         <button id="verifyBtn" class="btn btn-primary">
             <span id="verifyText">Verify OTP</span>
             <div id="verifySpinner" class="spinner" style="display: none;"></div>
         </button>
-        
         <button id="resendBtn" class="btn btn-secondary" disabled>
             <span id="resendText">Resend OTP</span>
             <div id="resendSpinner" class="spinner" style="display: none;"></div>
         </button>
-        
         <div class="timer" id="timer">Resend OTP in 1:00</div>
-        
         <div class="msg" id="responseMsg"></div>
+        {% endif %}
     </div>
 
-    <script>
-        // DOM Elements
-        const otpInputs = document.querySelectorAll('.otp-input');
-        const verifyBtn = document.getElementById('verifyBtn');
-        const resendBtn = document.getElementById('resendBtn');
-        const responseMsg = document.getElementById('responseMsg');
-        const verifyText = document.getElementById('verifyText');
-        const verifySpinner = document.getElementById('verifySpinner');
-        const resendText = document.getElementById('resendText');
-        const resendSpinner = document.getElementById('resendSpinner');
-        const timer = document.getElementById('timer');
+{% if not is_seller_otp %}
+<script>
+    // DOM Elements
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const responseMsg = document.getElementById('responseMsg');
+    const verifyText = document.getElementById('verifyText');
+    const verifySpinner = document.getElementById('verifySpinner');
+    const resendText = document.getElementById('resendText');
+    const resendSpinner = document.getElementById('resendSpinner');
+    const timer = document.getElementById('timer');
 
-        // OTP Input Handling
-        otpInputs.forEach((input, index) => {
-            // Focus next input on entry
-            input.addEventListener('input', (e) => {
-                if (input.value.length === 1) {
-                    if (index < otpInputs.length - 1) {
-                        otpInputs[index + 1].focus();
-                    }
-                    input.classList.add('filled');
-                } else {
-                    input.classList.remove('filled');
+    // OTP Input Handling
+    otpInputs.forEach((input, index) => {
+        // Focus next input on entry
+        input.addEventListener('input', (e) => {
+            if (input.value.length === 1) {
+                if (index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
                 }
-            });
-            
-            // Handle backspace
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && input.value.length === 0) {
-                    if (index > 0) {
-                        otpInputs[index - 1].focus();
-                    }
-                }
-            });
+                input.classList.add('filled');
+            } else {
+                input.classList.remove('filled');
+            }
         });
-
-        // Timer for resend OTP
-        let timeLeft = 60;
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timer.style.display = 'none';
-                resendBtn.disabled = false;
-            }
-        }, 1000);
-
-        // Verify OTP
-        verifyBtn.addEventListener('click', () => {
-            const otp = Array.from(otpInputs).map(input => input.value).join('');
-            
-            if (otp.length !== 6) {
-                responseMsg.textContent = 'Please enter a 6-digit OTP';
-                responseMsg.className = 'msg error';
-                return;
-            }
-
-            // Show loading state
-            verifyText.style.display = 'none';
-            verifySpinner.style.display = 'block';
-            verifyBtn.disabled = true;
-
-            fetch('/ajax/verify-otp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ otp })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    responseMsg.textContent = data.message;
-                    responseMsg.className = 'msg success';
-                    
-                    // Show success animation
-                    verifySpinner.style.display = 'none';
-                    verifyBtn.innerHTML = '<lord-icon src="https://cdn.lordicon.com/ljvjsnvh.json" trigger="loop" colors="primary:#ffffff" style="width:24px;height:24px"></lord-icon> Verified!';
-                    
-                    setTimeout(() => {
-                        window.location.href = "/dashboard";
-                    }, 1500);
-                } else {
-                    responseMsg.textContent = data.message;
-                    responseMsg.className = 'msg error';
-                    verifyText.style.display = 'block';
-                    verifySpinner.style.display = 'none';
-                    verifyBtn.disabled = false;
+        
+        // Handle backspace
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value.length === 0) {
+                if (index > 0) {
+                    otpInputs[index - 1].focus();
                 }
-            })
-            .catch(err => {
-                responseMsg.textContent = "Error verifying OTP. Please try again.";
+            }
+        });
+    });
+
+    // Timer for resend OTP
+    let timeLeft = 60;
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timer.style.display = 'none';
+            resendBtn.disabled = false;
+        }
+    }, 1000);
+
+    // Verify OTP
+    verifyBtn.addEventListener('click', () => {
+        const otp = Array.from(otpInputs).map(input => input.value).join('');
+        
+        if (otp.length !== 6) {
+            responseMsg.textContent = 'Please enter a 6-digit OTP';
+            responseMsg.className = 'msg error';
+            return;
+        }
+
+        // Show loading state
+        verifyText.style.display = 'none';
+        verifySpinner.style.display = 'block';
+        verifyBtn.disabled = true;
+
+        fetch('/ajax/verify-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ otp })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                responseMsg.textContent = data.message;
+                responseMsg.className = 'msg success';
+                
+                // Show success animation
+                verifySpinner.style.display = 'none';
+                verifyBtn.innerHTML = '<lord-icon src="https://cdn.lordicon.com/ljvjsnvh.json" trigger="loop" colors="primary:#ffffff" style="width:24px;height:24px"></lord-icon> Verified!';
+                
+                setTimeout(() => {
+                    window.location.href = "/dashboard";
+                }, 1500);
+            } else {
+                responseMsg.textContent = data.message;
                 responseMsg.className = 'msg error';
                 verifyText.style.display = 'block';
                 verifySpinner.style.display = 'none';
                 verifyBtn.disabled = false;
-            });
+            }
+        })
+        .catch(err => {
+            responseMsg.textContent = "Error verifying OTP. Please try again.";
+            responseMsg.className = 'msg error';
+            verifyText.style.display = 'block';
+            verifySpinner.style.display = 'none';
+            verifyBtn.disabled = false;
         });
+    });
 
-        // Resend OTP
-        resendBtn.addEventListener('click', () => {
-            // Show loading state
-            resendText.style.display = 'none';
-            resendSpinner.style.display = 'block';
-            resendBtn.disabled = true;
+    // Resend OTP
+    resendBtn.addEventListener('click', () => {
+        // Show loading state
+        resendText.style.display = 'none';
+        resendSpinner.style.display = 'block';
+        resendBtn.disabled = true;
 
-            fetch('/ajax/resend-otp', {
-                method: 'POST'
-            })
-            .then(res => res.json())
-            .then(data => {
-                responseMsg.textContent = data.message;
-                responseMsg.className = `msg ${data.success ? 'success' : 'error'}`;
+        fetch('/ajax/resend-otp', {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            responseMsg.textContent = data.message;
+            responseMsg.className = `msg ${data.success ? 'success' : 'error'}`;
+            
+            if (data.success) {
+                // Reset timer
+                timeLeft = 60;
+                timer.style.display = 'block';
+                resendBtn.disabled = true;
                 
-                if (data.success) {
-                    // Reset timer
-                    timeLeft = 60;
-                    timer.style.display = 'block';
-                    resendBtn.disabled = true;
+                const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
                     
-                    const timerInterval = setInterval(() => {
-                        timeLeft--;
-                        timer.textContent = `Resend OTP in 0:${timeLeft.toString().padStart(2, '0')}`;
-                        
-                        if (timeLeft <= 0) {
-                            clearInterval(timerInterval);
-                            timer.style.display = 'none';
-                            resendBtn.disabled = false;
-                        }
-                    }, 1000);
-                }
-                
-                resendText.style.display = 'block';
-                resendSpinner.style.display = 'none';
-                resendBtn.disabled = !data.success;
-            })
-            .catch(err => {
-                responseMsg.textContent = "Error resending OTP. Please try again.";
-                responseMsg.className = 'msg error';
-                resendText.style.display = 'block';
-                resendSpinner.style.display = 'none';
-                resendBtn.disabled = false;
-            });
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timer.style.display = 'none';
+                        resendBtn.disabled = false;
+                    }
+                }, 1000);
+            }
+            
+            resendText.style.display = 'block';
+            resendSpinner.style.display = 'none';
+            resendBtn.disabled = !data.success;
+        })
+        .catch(err => {
+            responseMsg.textContent = "Error resending OTP. Please try again.";
+            responseMsg.className = 'msg error';
+            resendText.style.display = 'block';
+            resendSpinner.style.display = 'none';
+            resendBtn.disabled = false;
         });
-    </script>
+    });
+</script>
+{% endif %}
 </body>
 </html>

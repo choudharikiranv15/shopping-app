@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 from collections import defaultdict
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import json
@@ -6,6 +8,7 @@ import os
 import random
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from core.otp_helper import send_otp_email
 from flask_mail import Mail
 from core.mail_config import mail, init_mail
 from core.db_helper import (
@@ -75,29 +78,25 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form['email'].strip()
+        password = request.form['password'].strip()
 
         conn = sqlite3.connect('database/app.db')
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-
-        # Fetch user and check if seller
-        c.execute(
-            "SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
+        c.execute("SELECT * FROM profiles WHERE email = ?", (email,))
         user = c.fetchone()
+        conn.close()
 
-        if user:
+        if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
-            session['role'] = user['role']
+            session['user_email'] = user['email']
+            flash("Login successful!", "success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Invalid credentials", "danger")
+            return redirect(url_for('login'))
 
-            if user['role'] == 'seller':
-                return redirect(url_for('seller_dashboard'))
-            else:
-                return redirect(url_for('dashboard'))
-
-        flash('Invalid credentials', 'danger')
-        return redirect(url_for('login'))
     return render_template('login.html')
 
 
@@ -107,7 +106,7 @@ def verify_otp():
         return redirect("/login")
 
     if request.method == "POST":
-        entered_otp = request.form["otp"]
+        entered_otp = request.form.get("otp")
         if entered_otp == session.get("otp"):
             session["otp_verified"] = True
             session.pop("otp", None)
@@ -115,7 +114,10 @@ def verify_otp():
             return redirect("/dashboard")
         else:
             flash("Incorrect OTP", "danger")
-    return render_template("verify_otp.html")
+    elif "otp" not in session:
+        flash("No OTP found. Please login/register again.", "danger")
+        return redirect("/login")
+    return render_template("verify_otp.html", otp_action=url_for('verify_otp'), is_seller_otp=False)
 
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
@@ -144,7 +146,7 @@ def forgot_password():
 @app.route("/verify-otp-reset", methods=["GET", "POST"])
 def verify_otp_reset():
     if request.method == "POST":
-        entered_otp = request.form["otp"]
+        entered_otp = request.form.get("otp")
         if entered_otp == session.get("otp"):
             session["otp_verified_reset"] = True
             flash("OTP verified. Please reset your password.", "success")
@@ -766,34 +768,47 @@ def get_reviews_for_product(product_id):
 @app.route('/seller_register', methods=['GET', 'POST'])
 def seller_register():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
+        name = request.form['name'].strip()
+        email = request.form['email'].strip()
+        phone = request.form['phone'].strip()
         password = request.form['password']
-        business_name = request.form['business_name']
-        gst_number = request.form['gst_number']
-        address = request.form['address']
+        business_name = request.form['business_name'].strip()
+        gst_number = request.form['gst_number'].strip()
+        address = request.form['address'].strip()
 
+        # Check if email already exists
         conn = sqlite3.connect('database/app.db')
         c = conn.cursor()
-
-        # Check if already registered
         c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
-        if c.fetchone():
-            flash("Email already registered", "danger")
-            conn.close()
-            return redirect(url_for('seller_register'))
-
-        # Insert new seller with documents
-        c.execute("""
-            INSERT INTO sellers (name, email, phone, password, business_name, gst_number, address)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (name, email, phone, password, business_name, gst_number, address))
-        conn.commit()
+        existing = c.fetchone()
         conn.close()
 
-        flash("Seller registered successfully. Please login.", "success")
-        return redirect(url_for('seller_login'))
+        if existing:
+            flash("Email already registered as seller.", "warning")
+            return redirect(url_for('seller_register'))
+
+        # Generate OTP and save info to session
+        otp = str(random.randint(100000, 999999))
+        session['pending_seller'] = {
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'password': generate_password_hash(password),
+            'business_name': business_name,
+            'gst_number': gst_number,
+            'address': address
+        }
+        session['seller_otp'] = otp
+        session['user_email'] = email  # Used for resend-otp endpoint
+
+        try:
+            send_otp_email(email, otp)
+            flash("OTP sent to your email for verification.", "info")
+            return redirect(url_for('verify_seller_otp'))
+        except Exception as e:
+            print("Failed to send OTP email:", e)
+            flash("Failed to send OTP email. Please try again.", "danger")
+            return redirect(url_for('seller_register'))
 
     return render_template('seller_register.html')
 
@@ -807,20 +822,19 @@ def seller_login():
         conn = sqlite3.connect('database/app.db')
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute(
-            "SELECT id, name FROM sellers WHERE email = ? AND password = ?", (email, password))
+        c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
         seller = c.fetchone()
         conn.close()
 
-        if seller:
-            session.clear()  # Clear previous user or seller session
+        if seller and check_password_hash(seller['password'], password):
             session['seller_id'] = seller['id']
             session['seller_name'] = seller['name']
-            session['role'] = 'seller'  # Important for role-based access
-            flash("Seller login successful!", "success")
+            session['role'] = 'seller'  # Needed for route protections
+            flash("Login successful!", "success")
             return redirect(url_for('seller_dashboard'))
         else:
             flash("Invalid credentials", "danger")
+            return redirect(url_for('seller_login'))
 
     return render_template('seller/login.html')
 
@@ -856,6 +870,14 @@ def seller_add_product():
         stock = int(request.form['stock'])
         image_url = request.form.get('image_url', '')
 
+        # Handle file upload
+        image_file = request.files.get('image')
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(upload_path)
+            image_url = os.path.join('static', 'uploads', filename)
+
         conn = sqlite3.connect('database/app.db')
         c = conn.cursor()
         c.execute("""
@@ -887,6 +909,14 @@ def seller_edit_product(product_id):
         description = request.form['description']
         stock = int(request.form['stock'])
         image_url = request.form.get('image_url', '')
+
+        # Handle file upload
+        image_file = request.files.get('image')
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(upload_path)
+            image_url = os.path.join('static', 'uploads', filename)
 
         c.execute("""
             UPDATE products
@@ -934,6 +964,58 @@ def seller_logout():
     session.pop('role', None)
     flash("Logged out from seller account.", "info")
     return redirect(url_for('seller_login'))
+
+
+@app.route('/verify_seller_otp', methods=['GET', 'POST'])
+def verify_seller_otp():
+    if request.method == 'POST':
+        entered_otp = ''.join([
+            request.form.get('otp1', ''),
+            request.form.get('otp2', ''),
+            request.form.get('otp3', ''),
+            request.form.get('otp4', ''),
+            request.form.get('otp5', ''),
+            request.form.get('otp6', ''),
+        ])
+        # Check if OTP exists in session
+        session_otp = session.get('seller_otp')
+        if not session_otp:
+            flash("OTP session expired. Please register again.", "warning")
+            return redirect(url_for('seller_register'))
+
+        if entered_otp == session_otp:
+            seller = session.pop('pending_seller', None)
+            session.pop('seller_otp', None)
+
+            if seller:
+                try:
+                    conn = sqlite3.connect('database/app.db')
+                    c = conn.cursor()
+                    c.execute("""
+                        INSERT INTO sellers (name, email, phone, password, business_name, gst_number, address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        seller['name'], seller['email'], seller['phone'], seller['password'],
+                        seller['business_name'], seller['gst_number'], seller['address']
+                    ))
+                    conn.commit()
+                    conn.close()
+
+                    flash("Seller registered successfully. Please login.", "success")
+                    return redirect(url_for('seller_login'))
+                except Exception as e:
+                    print("Error inserting seller:", e)
+                    flash("Registration failed. Please try again.", "danger")
+                    return redirect(url_for('seller_register'))
+            else:
+                flash(
+                    "Session expired. Please fill the registration form again.", "danger")
+                return redirect(url_for('seller_register'))
+        else:
+            flash("Invalid OTP. Please try again.", "danger")
+
+    return render_template('verify_otp.html', otp_action=url_for('verify_seller_otp'), is_seller_otp=True)
+
 
 # Address Routes
 
@@ -1314,13 +1396,13 @@ def dashboard():
 
 @app.route('/ajax/verify-otp', methods=['POST'])
 def ajax_verify_otp():
-    if "user_id" not in session:
-        return jsonify({'success': False, 'message': 'Not logged in'}), 401
-
     data = request.get_json()
     entered_otp = data.get("otp")
 
-    if entered_otp == session.get("otp"):
+    if "otp" not in session:
+        return jsonify({'success': False, 'message': 'No OTP found. Please login/register again.'}), 401
+
+    if entered_otp == session["otp"]:
         session["otp_verified"] = True
         session.pop("otp", None)
         return jsonify({'success': True, 'message': 'OTP Verified'})
@@ -1330,11 +1412,11 @@ def ajax_verify_otp():
 
 @app.route('/ajax/resend-otp', methods=['POST'])
 def ajax_resend_otp():
-    if "user_email" not in session:
+    if 'user_email' not in session:
         return jsonify({'success': False, 'message': 'User not logged in'}), 401
 
     otp = str(random.randint(100000, 999999))
-    session["otp"] = otp
+    session['otp'] = otp
 
     try:
         send_otp_email(session['user_email'], otp)

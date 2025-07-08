@@ -58,6 +58,7 @@
                       src="{{ p.image_url or url_for('static', filename='images/placeholder.png') }}"
                       alt="{{ p.name }}"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/placeholder.png') }}';"
                     >
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     {% if p.discount %}
@@ -98,6 +99,7 @@
                   src="{{ p.image_url or url_for('static', filename='images/placeholder.png') }}"
                   alt="{{ p.name }}"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/placeholder.png') }}';"
                 >
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 {% if p.discount %}
