@@ -127,15 +127,6 @@ project/
 
 ---
 
-## 📸 Screenshots
-
-* 🏠 Homepage
-* 🛒 Product Detail
-* ✅ Order Confirmation
-* 📿 Seller Dashboard
-
----
-
 ## 🧠 Future Improvements
 
 * 🔐 JWT-based API auth
