@@ -21,10 +21,13 @@ from core.db_helper import (
 )
 from core.user_helper import get_user_by_id
 from core.otp_helper import send_otp_email
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 init_mail(app)
-app.secret_key = "7411971510$"
+app.secret_key = os.getenv("SECRET_KEY", "change-this-in-prod")
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -682,7 +685,7 @@ def orders():
 
 
 def get_user_orders(user_id):
-    conn = sqlite3.connect("D:/kiran/Pyspiders/Python/project/database/app.db")
+    conn = sqlite3.connect("database/app.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -1433,4 +1436,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=os.getenv('FLASK_DEBUG', 'False').lower() == 'true')
