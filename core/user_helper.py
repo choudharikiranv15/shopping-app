@@ -1,8 +1,9 @@
+from core.db_helper import get_db_connection
+
+
 def get_user_by_id(user_id):
-    import sqlite3
-    conn = sqlite3.connect('database/app.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM profiles WHERE id = ?", (user_id,))
+    conn = get_db_connection()
+    cursor = conn.execute("SELECT * FROM profiles WHERE id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
     if row:

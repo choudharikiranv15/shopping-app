@@ -22,6 +22,7 @@ from core.db_helper import (
 from core.user_helper import get_user_by_id
 from core.otp_helper import send_otp_email
 from dotenv import load_dotenv
+from core.db_helper import get_db_connection
 
 load_dotenv()
 
@@ -56,7 +57,7 @@ def register():
         password = request.form["password"]
         username = request.form["username"]
 
-        conn = sqlite3.connect('database/app.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM profiles WHERE email = ?", (email,))
         existing_user = cursor.fetchone()
@@ -84,8 +85,7 @@ def login():
         email = request.form['email'].strip()
         password = request.form['password'].strip()
 
-        conn = sqlite3.connect('database/app.db')
-        conn.row_factory = sqlite3.Row
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("SELECT * FROM profiles WHERE email = ?", (email,))
         user = c.fetchone()
@@ -127,7 +127,7 @@ def verify_otp():
 def forgot_password():
     if request.method == "POST":
         email = request.form["email"]
-        conn = sqlite3.connect("database/app.db")
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM profiles WHERE email = ?", (email,))
         row = cursor.fetchone()
@@ -175,7 +175,7 @@ def reset_password():
         email = session.get("reset_email")
         hashed_pw = generate_password_hash(new_password)
 
-        conn = sqlite3.connect("database/app.db")
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "UPDATE profiles SET password = ? WHERE email = ?", (hashed_pw, email))
@@ -206,7 +206,7 @@ def show_category_products(category):
 
 @app.route('/product/<int:product_id>')
 def view_product(product_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
@@ -266,7 +266,7 @@ def add_product():
     if not name or not category:
         return "Missing required fields", 400
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO products (name, price, category, description, stock, image_url) VALUES (?, ?, ?, ?, ?, ?)",
                    (name, price, category, description, stock, image_url))
@@ -277,7 +277,7 @@ def add_product():
 
 
 def fetch_products():
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products")
     rows = cursor.fetchall()
@@ -304,7 +304,7 @@ def remove_from_wishlist(product_id):
         flash("Please login first.", "warning")
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("DELETE FROM wishlist WHERE user_id = ? AND product_id = ?",
               (user_id, product_id))
@@ -328,7 +328,7 @@ def cart():
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('''
         SELECT cart.id as cart_id, products.*, cart.quantity
@@ -352,7 +352,7 @@ def add_to_cart(product_id):
     user_id = session['user_id']
     quantity = int(request.form.get('quantity', 1))  # fetch quantity from form
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
               (user_id, product_id, quantity))
@@ -368,7 +368,7 @@ def update_quantity():
     cart_id = int(request.form['cart_id'])
     quantity = int(request.form['quantity'])
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("UPDATE cart SET quantity = ? WHERE id = ?", (quantity, cart_id))
     conn.commit()
@@ -380,7 +380,7 @@ def update_quantity():
 
 @app.route('/remove_from_cart/<int:cart_id>')
 def remove_from_cart(cart_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("DELETE FROM cart WHERE id = ?", (cart_id,))
     conn.commit()
@@ -391,7 +391,7 @@ def remove_from_cart(cart_id):
 
 @app.route('/product/<int:product_id>')
 def product_detail(product_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
 
     # Fetch product
@@ -441,7 +441,7 @@ def checkout():
     if not user_id:
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -570,7 +570,7 @@ def add_to_wishlist(product_id):
         flash("Please login to add items to wishlist.", "warning")
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT 1 FROM wishlist WHERE user_id = ? AND product_id = ?",
               (user_id, product_id))
@@ -595,7 +595,7 @@ def wishlist():
         flash("Please login to view your wishlist.", "warning")
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("""
         SELECT p.id, p.name, p.price, p.image_url 
@@ -616,7 +616,7 @@ def buy_now(product_id):
         flash("Please login to continue.", "warning")
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT name, price FROM products WHERE id = ?", (product_id,))
     product = c.fetchone()
@@ -642,7 +642,7 @@ def orders():
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
@@ -685,7 +685,7 @@ def orders():
 
 
 def get_user_orders(user_id):
-    conn = sqlite3.connect("database/app.db")
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -739,7 +739,7 @@ def submit_review(product_id):
         flash("Please provide both rating and comment.", "danger")
         return redirect(url_for('product_detail', product_id=product_id))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("INSERT INTO reviews (user_id, product_id, rating, comment) VALUES (?, ?, ?, ?)",
               (user_id, product_id, rating, comment))
@@ -751,7 +751,7 @@ def submit_review(product_id):
 
 
 def get_reviews_for_product(product_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('''
         SELECT r.rating, r.comment, r.created_at, u.username
@@ -780,7 +780,7 @@ def seller_register():
         address = request.form['address'].strip()
 
         # Check if email already exists
-        conn = sqlite3.connect('database/app.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
         existing = c.fetchone()
@@ -822,7 +822,7 @@ def seller_login():
         email = request.form['email']
         password = request.form['password']
 
-        conn = sqlite3.connect('database/app.db')
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute("SELECT * FROM sellers WHERE email = ?", (email,))
@@ -849,7 +849,7 @@ def seller_dashboard():
         flash("Access denied. Seller login required.", "warning")
         return redirect(url_for('seller_login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute("SELECT * FROM products WHERE seller_id = ?",
@@ -881,7 +881,7 @@ def seller_add_product():
             image_file.save(upload_path)
             image_url = os.path.join('static', 'uploads', filename)
 
-        conn = sqlite3.connect('database/app.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("""
             INSERT INTO products (name, price, category, description, stock, image_url, seller_id)
@@ -901,7 +901,7 @@ def seller_edit_product(product_id):
     if session.get('role') != 'seller' or 'seller_id' not in session:
         return redirect(url_for('seller_login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
@@ -949,7 +949,7 @@ def seller_delete_product(product_id):
     if session.get('role') != 'seller' or 'seller_id' not in session:
         return redirect(url_for('seller_login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("DELETE FROM products WHERE id = ? AND seller_id = ?",
               (product_id, session['seller_id']))
@@ -992,7 +992,7 @@ def verify_seller_otp():
 
             if seller:
                 try:
-                    conn = sqlite3.connect('database/app.db')
+                    conn = get_db_connection()
                     c = conn.cursor()
                     c.execute("""
                         INSERT INTO sellers (name, email, phone, password, business_name, gst_number, address)
@@ -1034,7 +1034,7 @@ def add_address():
         pincode = request.form['pincode']
         phone = request.form['phone']
 
-        conn = sqlite3.connect('database/app.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute('''
             INSERT INTO addresses (user_id, name, street, city, state, pincode, phone)
@@ -1050,7 +1050,7 @@ def add_address():
 
 @app.route('/edit_address/<int:address_id>', methods=['GET', 'POST'])
 def edit_address(address_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -1084,7 +1084,7 @@ def edit_address(address_id):
 
 @app.route('/delete_address/<int:address_id>')
 def delete_address(address_id):
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("DELETE FROM addresses WHERE id=?", (address_id,))
     conn.commit()
@@ -1127,7 +1127,7 @@ def order_confirmation():
 def finalize_order(user_id, payment_method, address_str):
     import datetime
     import random
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
 
     # Fetch cart items
@@ -1193,7 +1193,7 @@ def payment():
     payment_method = checkout_data['payment_method']
 
     # Fetch address
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT name, street, city, state, phone FROM addresses WHERE id = ? AND user_id = ?",
               (address_id, user_id))
@@ -1229,7 +1229,7 @@ def process_payment():
     address_id = checkout_data['address_id']
     payment_method = checkout_data['payment_method']
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT name, street, city, state, phone FROM addresses WHERE id = ? AND user_id = ?",
               (address_id, user_id))
@@ -1256,7 +1256,7 @@ def profile():
     if not email:
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM profiles WHERE email = ?", (email,))
     row = cursor.fetchone()
@@ -1284,7 +1284,7 @@ def edit_profile():
         return redirect("/login")
 
     email = session.get('user_email')
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     if request.method == 'POST':
@@ -1357,7 +1357,7 @@ def create_profile():
             file.save(save_path)
             profile_pic_file_path = save_path
 
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE profiles SET username = ?, phone = ?, address = ?, gender = ?, profile_pic_url = ?, profile_pic_file = ?
@@ -1376,7 +1376,7 @@ def dashboard():
         return redirect(url_for('login'))
 
     email = session.get("user_email")
-    conn = sqlite3.connect('database/app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM profiles WHERE email = ?", (email,))
     row = cursor.fetchone()
