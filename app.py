@@ -22,9 +22,16 @@ from core.db_helper import (
 from core.user_helper import get_user_by_id
 from core.otp_helper import send_otp_email
 from dotenv import load_dotenv
+import cloudinary
+import cloudinary.uploader
 from core.db_helper import get_db_connection
 
 load_dotenv()
+if os.getenv('CLOUDINARY_URL'):
+    try:
+        cloudinary.config(cloudinary_url=os.getenv('CLOUDINARY_URL'))
+    except Exception as _e:
+        print(f"Cloudinary config failed: {_e}")
 
 app = Flask(__name__)
 init_mail(app)
