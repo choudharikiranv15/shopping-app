@@ -884,11 +884,14 @@ def seller_add_product():
         image_file = request.files.get('image')
         if image_file and image_file.filename:
             if os.getenv('CLOUDINARY_URL'):
-                upload_result = cloudinary.uploader.upload(image_file, folder='products')
-                image_url = upload_result.get('secure_url') or upload_result.get('url')
+                upload_result = cloudinary.uploader.upload(
+                    image_file, folder='products')
+                image_url = upload_result.get(
+                    'secure_url') or upload_result.get('url')
             else:
                 filename = secure_filename(image_file.filename)
-                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                upload_path = os.path.join(
+                    app.config['UPLOAD_FOLDER'], filename)
                 image_file.save(upload_path)
                 image_url = os.path.join('static', 'uploads', filename)
 
@@ -928,11 +931,14 @@ def seller_edit_product(product_id):
         image_file = request.files.get('image')
         if image_file and image_file.filename:
             if os.getenv('CLOUDINARY_URL'):
-                upload_result = cloudinary.uploader.upload(image_file, folder='products')
-                image_url = upload_result.get('secure_url') or upload_result.get('url')
+                upload_result = cloudinary.uploader.upload(
+                    image_file, folder='products')
+                image_url = upload_result.get(
+                    'secure_url') or upload_result.get('url')
             else:
                 filename = secure_filename(image_file.filename)
-                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                upload_path = os.path.join(
+                    app.config['UPLOAD_FOLDER'], filename)
                 image_file.save(upload_path)
                 image_url = os.path.join('static', 'uploads', filename)
 
@@ -1323,8 +1329,10 @@ def edit_profile():
             file = request.files['profile_pic_file']
             if file and file.filename:
                 if os.getenv('CLOUDINARY_URL'):
-                    upload_result = cloudinary.uploader.upload(file, folder='profiles')
-                    profile_pic_file_path = upload_result.get('secure_url') or upload_result.get('url')
+                    upload_result = cloudinary.uploader.upload(
+                        file, folder='profiles')
+                    profile_pic_file_path = upload_result.get(
+                        'secure_url') or upload_result.get('url')
                 else:
                     filename = secure_filename(file.filename)
                     save_path = os.path.join('static/uploads', filename)
@@ -1383,8 +1391,10 @@ def create_profile():
         file = request.files['profile_pic_file']
         if file and file.filename:
             if os.getenv('CLOUDINARY_URL'):
-                upload_result = cloudinary.uploader.upload(file, folder='profiles')
-                profile_pic_file_path = upload_result.get('secure_url') or upload_result.get('url')
+                upload_result = cloudinary.uploader.upload(
+                    file, folder='profiles')
+                profile_pic_file_path = upload_result.get(
+                    'secure_url') or upload_result.get('url')
             else:
                 filename = secure_filename(file.filename)
                 save_path = os.path.join('static/uploads', filename)
