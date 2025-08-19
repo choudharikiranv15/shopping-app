@@ -1123,7 +1123,7 @@ def order_confirmation():
         flash("Your order session has expired or no order found.", "warning")
         return redirect(url_for('products'))
 
-    # Ensure address is structured (if passed as plain string earlier)
+    # ... (your existing address processing code remains the same)
     if isinstance(order.get('address'), str):
         try:
             parts = order['address'].split(', ')
@@ -1139,8 +1139,21 @@ def order_confirmation():
                 'name': '-', 'street': '-', 'city': '-', 'state': '-', 'phone': '-'
             }
 
-    return render_template('order_confirmation.html', order=order)
+    # ✅ START: Add this block to convert item data types
+    # Loop through each item in the order's 'items' list
+    if 'items' in order and order['items']:
+        for item in order['items']:
+            try:
+                # Convert price to a float and quantity to an integer
+                item['price'] = float(item.get('price', 0))
+                item['quantity'] = int(item.get('quantity', 0))
+            except (ValueError, TypeError):
+                # If conversion fails, default them to 0 to prevent crashes
+                item['price'] = 0.0
+                item['quantity'] = 0
+    # ✅ END: Conversion block
 
+    return render_template('order_confirmation.html', order=order)
 
 # 🔁 FINALIZE ORDER FUNCTION (returns dict, does not render)
 
