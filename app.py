@@ -883,10 +883,14 @@ def seller_add_product():
         # Handle file upload
         image_file = request.files.get('image')
         if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(upload_path)
-            image_url = os.path.join('static', 'uploads', filename)
+            if os.getenv('CLOUDINARY_URL'):
+                upload_result = cloudinary.uploader.upload(image_file, folder='products')
+                image_url = upload_result.get('secure_url') or upload_result.get('url')
+            else:
+                filename = secure_filename(image_file.filename)
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image_file.save(upload_path)
+                image_url = os.path.join('static', 'uploads', filename)
 
         conn = get_db_connection()
         c = conn.cursor()
@@ -923,10 +927,14 @@ def seller_edit_product(product_id):
         # Handle file upload
         image_file = request.files.get('image')
         if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(upload_path)
-            image_url = os.path.join('static', 'uploads', filename)
+            if os.getenv('CLOUDINARY_URL'):
+                upload_result = cloudinary.uploader.upload(image_file, folder='products')
+                image_url = upload_result.get('secure_url') or upload_result.get('url')
+            else:
+                filename = secure_filename(image_file.filename)
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                image_file.save(upload_path)
+                image_url = os.path.join('static', 'uploads', filename)
 
         c.execute("""
             UPDATE products
@@ -1314,10 +1322,14 @@ def edit_profile():
         if 'profile_pic_file' in request.files:
             file = request.files['profile_pic_file']
             if file and file.filename:
-                filename = secure_filename(file.filename)
-                save_path = os.path.join('static/uploads', filename)
-                file.save(save_path)
-                profile_pic_file_path = save_path
+                if os.getenv('CLOUDINARY_URL'):
+                    upload_result = cloudinary.uploader.upload(file, folder='profiles')
+                    profile_pic_file_path = upload_result.get('secure_url') or upload_result.get('url')
+                else:
+                    filename = secure_filename(file.filename)
+                    save_path = os.path.join('static/uploads', filename)
+                    file.save(save_path)
+                    profile_pic_file_path = save_path
 
         cursor.execute("""
             UPDATE profiles
@@ -1370,10 +1382,14 @@ def create_profile():
     if 'profile_pic_file' in request.files:
         file = request.files['profile_pic_file']
         if file and file.filename:
-            filename = secure_filename(file.filename)
-            save_path = os.path.join('static/uploads', filename)
-            file.save(save_path)
-            profile_pic_file_path = save_path
+            if os.getenv('CLOUDINARY_URL'):
+                upload_result = cloudinary.uploader.upload(file, folder='profiles')
+                profile_pic_file_path = upload_result.get('secure_url') or upload_result.get('url')
+            else:
+                filename = secure_filename(file.filename)
+                save_path = os.path.join('static/uploads', filename)
+                file.save(save_path)
+                profile_pic_file_path = save_path
 
     conn = get_db_connection()
     cursor = conn.cursor()
