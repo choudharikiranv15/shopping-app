@@ -1280,8 +1280,17 @@ def profile():
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
-    if 'user_email' not in session or not session.get("otp_verified"):
+    if 'user_email' not in session:
         return redirect("/login")
+    if not session.get("otp_verified"):
+        otp = str(random.randint(100000, 999999))
+        session['otp'] = otp
+        try:
+            send_otp_email(session['user_email'], otp)
+        except Exception as e:
+            print(f"Failed to send OTP: {e}")
+        flash("OTP sent to your email. Please verify to continue.", "info")
+        return redirect(url_for('verify_otp'))
 
     email = session.get('user_email')
     conn = get_db_connection()
@@ -1338,8 +1347,10 @@ def legacy_edit_profile():
 
 @app.route('/create-profile', methods=['POST'])
 def create_profile():
-    if 'user_email' not in session or not session.get("otp_verified"):
+    if 'user_email' not in session:
         return redirect("/login")
+    if not session.get("otp_verified"):
+        return redirect(url_for('verify_otp'))
 
     username = request.form['username']
     phone = request.form['phone']
