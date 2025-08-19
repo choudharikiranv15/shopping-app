@@ -1,3 +1,5 @@
+import logging  # Add this at the top of your app.py if it's not there
+import logging
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 from collections import defaultdict
@@ -1116,14 +1118,16 @@ def delete_address(address_id):
 
 @app.route('/order_confirmation')
 def order_confirmation():
-    # Safely get and remove the order from session
     order = session.pop('order', None)
 
     if not order:
         flash("Your order session has expired or no order found.", "warning")
         return redirect(url_for('products'))
 
-    # ... (your existing address processing code remains the same)
+    # For debugging: Log the structure and types of your order data
+    logging.warning(f"ORDER DATA FROM SESSION: {order}")
+
+    # ... (your address processing code remains here) ...
     if isinstance(order.get('address'), str):
         try:
             parts = order['address'].split(', ')
@@ -1139,23 +1143,38 @@ def order_confirmation():
                 'name': '-', 'street': '-', 'city': '-', 'state': '-', 'phone': '-'
             }
 
-    # ✅ START: Add this block to convert item data types
-    # Loop through each item in the order's 'items' list
-    if 'items' in order and order['items']:
+    # ✅ START: New robust conversion block
+    # Check if 'items' key exists and is a list
+    if 'items' in order and isinstance(order.get('items'), list):
         for item in order['items']:
             try:
-                # Convert price to a float and quantity to an integer
-                item['price'] = float(item.get('price', 0))
-                item['quantity'] = int(item.get('quantity', 0))
-            except (ValueError, TypeError):
-                # If conversion fails, default them to 0 to prevent crashes
-                item['price'] = 0.0
-                item['quantity'] = 0
-    # ✅ END: Conversion block
+                # Determine if item is a dictionary or an object
+                if isinstance(item, dict):
+                    # It's a DICTIONARY, use key assignment
+                    item['price'] = float(item.get('price', 0))
+                    item['quantity'] = int(item.get('quantity', 0))
+                else:
+                    # It's an OBJECT, use setattr()
+                    price_val = float(getattr(item, 'price', 0))
+                    quantity_val = int(getattr(item, 'quantity', 0))
+                    setattr(item, 'price', price_val)
+                    setattr(item, 'quantity', quantity_val)
+            except (ValueError, TypeError) as e:
+                logging.error(
+                    f"Could not convert item data: {item}. Error: {e}")
+                # Set defaults to prevent crashes
+                if isinstance(item, dict):
+                    item['price'] = 0.0
+                    item['quantity'] = 0
+                else:
+                    setattr(item, 'price', 0.0)
+                    setattr(item, 'quantity', 0)
+    # ✅ END: New robust conversion block
 
     return render_template('order_confirmation.html', order=order)
-
 # 🔁 FINALIZE ORDER FUNCTION (returns dict, does not render)
+
+# 🔁 FINALIZE ORDER FUNCTION (Slightly Refactored)
 
 
 def finalize_order(user_id, payment_method, address_str):
@@ -1164,49 +1183,63 @@ def finalize_order(user_id, payment_method, address_str):
     conn = get_db_connection()
     c = conn.cursor()
 
-    # Fetch cart items
     c.execute("""
         SELECT p.name, c.quantity, p.price 
-        FROM cart c 
-        JOIN products p ON c.product_id = p.id 
+        FROM cart c JOIN products p ON c.product_id = p.id 
         WHERE c.user_id = ?
     """, (user_id,))
-    cart_items = c.fetchall()
+    cart_items_data = c.fetchall()
 
-    if not cart_items:
+    if not cart_items_data:
         flash("Your cart is empty!", "warning")
         return None
 
+    # --- Prepare order details ---
     order_id = f"ORD{random.randint(1000, 9999)}"
     order_date = datetime.datetime.now().strftime("%d-%m-%Y %I:%M %p")
-    total_price = sum(quantity * price for _, quantity, price in cart_items)
+    total_price = sum(quantity * price for _, quantity,
+                      price in cart_items_data)
 
-    # Insert into orders
-    c.execute("""
-        INSERT INTO orders (order_id, user_id, date, total, payment_method, shipping_address)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (order_id, user_id, order_date, total_price, payment_method.upper(), address_str))
+    # This list will be returned in the final dictionary
+    order_items_list = []
 
-    # Insert into order_items
-    for name, quantity, price in cart_items:
+    # --- Database operations ---
+    conn.execute("BEGIN TRANSACTION")
+    try:
+        # Insert into orders table
         c.execute("""
-            INSERT INTO order_items (order_id, product_name, quantity, price)
-            VALUES (?, ?, ?, ?)
-        """, (order_id, name, quantity, price))
+            INSERT INTO orders (order_id, user_id, date, total, payment_method, shipping_address)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (order_id, user_id, order_date, total_price, payment_method.upper(), address_str))
 
-    # Clear cart
-    c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
-    conn.commit()
-    conn.close()
+        # Insert each item and build the list for the return dictionary
+        for name, quantity, price in cart_items_data:
+            c.execute("""
+                INSERT INTO order_items (order_id, product_name, quantity, price)
+                VALUES (?, ?, ?, ?)
+            """, (order_id, name, quantity, price))
+            # Append item dict to our list
+            order_items_list.append(
+                {"name": name, "quantity": quantity, "price": price})
 
-    # Clear checkout session
+        # Clear the user's cart
+        c.execute("DELETE FROM cart WHERE user_id = ?", (user_id,))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        # You should log the error `e` here
+        return None  # Or handle the error appropriately
+    finally:
+        conn.close()
+
     session.pop('checkout_data', None)
 
+    # --- Return the complete order dictionary ---
     return {
         "id": order_id,
         "date": order_date,
         "payment_method": payment_method.upper(),
-        "items": [{"name": name, "quantity": quantity, "price": price} for name, quantity, price in cart_items],
+        "items": order_items_list,  # Use the list we built
         "total": total_price,
         "address": {
             "name": address_str.split(',')[0],
@@ -1214,8 +1247,9 @@ def finalize_order(user_id, payment_method, address_str):
         }
     }
 
-
 # Payment
+
+
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
     if 'user_id' not in session or 'checkout_data' not in session:
